@@ -45,13 +45,59 @@
             text-align: center;
             border-radius: 0 0 12px 12px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            margin-bottom: 2rem;
         }
 
         header h1 {
             font-size: 1.75rem;
             font-weight: 600;
         }
+
+        /* Profile Section */
+        .profile-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background-color: var(--white);
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            margin-top: 2rem;
+        }
+
+        .photo-circle {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background-color: var(--light-blue);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--dark-blue);
+            flex-shrink: 0;
+        }
+
+        .user-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--dark-blue);
+            border: none;
+            padding-bottom: 0;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .user-name-input {
+            font-family: inherit;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--dark-blue);
+            border: none;
+            border-bottom: 2px solid var(--dark-blue);
+            outline: none;
+            background: transparent;
+            width: 100%;
+        }
+
 
         /* Section Title */
         h2 {
@@ -69,18 +115,12 @@
             gap: 1.5rem;
         }
 
-        @media (min-width: 768px) {
+        @media (min-width: 600px) {
             .dashboard-grid {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             }
             .stock-grid {
                 grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-         @media (min-width: 900px) {
-            .dashboard-grid {
-                grid-template-columns: repeat(4, 1fr);
             }
         }
 
@@ -191,11 +231,12 @@
             width: auto;
             padding: 0.8rem 1rem;
             font-size: 1rem;
-            background-color: var(--medium-blue);
+            background-color: var(--success); /* Alterado para verde para melhor visibilidade */
+            font-weight: 700; /* Texto em negrito */
         }
         
         .stock-actions .btn:hover {
-             background-color: #5C6BC0;
+             background-color: #2E7D32; /* Verde mais escuro ao passar o mouse */
         }
 
         /* History List */
@@ -235,6 +276,28 @@
         .history-item-value {
             font-weight: 600;
             font-size: 1rem;
+        }
+
+        .history-item-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .delete-sale-btn {
+            background: transparent;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            font-size: 1.5rem;
+            line-height: 1;
+            padding: 0.25rem;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+        }
+
+        .delete-sale-btn:hover {
+            background-color: #FFCDD2; /* Light red */
         }
 
         /* Sale Modal */
@@ -361,9 +424,21 @@
     </header>
 
     <div class="container">
+        <!-- Profile Section -->
+        <section class="profile-section">
+            <div class="photo-circle" title="Foto de Perfil">
+                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+                </svg>
+            </div>
+            <div id="user-name-wrapper">
+                 <h2 id="user-name" class="user-name" title="Clique para editar">Seu Nome Aqui</h2>
+            </div>
+        </section>
+
         <main>
              <!-- Actions Section -->
-            <section id="actions">
+            <section id="actions" style="margin-top: 2rem;">
                  <button class="btn btn-primary" id="new-sale-btn" style="padding: 1.25rem; font-size: 1.25rem;">
                     &#43; Nova Venda
                 </button>
@@ -380,6 +455,10 @@
                     <div class="card">
                         <h3>Total Faturado</h3>
                         <p class="value" id="total-revenue">R$ 0,00</p>
+                    </div>
+                     <div class="card">
+                        <h3 id="daily-revenue-title">Vendas de Hoje</h3>
+                        <p class="value" id="daily-revenue">R$ 0,00</p>
                     </div>
                     <div class="card">
                         <h3>Pares de R$25 Vendidos</h3>
@@ -485,6 +564,7 @@
 
             // --- State Management ---
             let data = {
+                profile: { name: 'Seu Nome Aqui' },
                 stock: { p25: 0, p35: 0 },
                 salesHistory: []
             };
@@ -492,6 +572,8 @@
 
             // --- DOM Elements ---
             const ui = {
+                userNameWrapper: document.getElementById('user-name-wrapper'),
+                userName: document.getElementById('user-name'),
                 totalPairsSold: document.getElementById('total-pairs-sold'),
                 totalRevenue: document.getElementById('total-revenue'),
                 p25Sold: document.getElementById('p25-sold'),
@@ -505,6 +587,8 @@
                 monthFilter: document.getElementById('month-filter'),
                 salesHistoryList: document.getElementById('sales-history-list'),
                 noSalesMessage: document.getElementById('no-sales-message'),
+                dailyRevenue: document.getElementById('daily-revenue'),
+                dailyRevenueTitle: document.getElementById('daily-revenue-title'),
                 
                 // New Sale Flow UI
                 newSaleBtn: document.getElementById('new-sale-btn'),
@@ -525,10 +609,10 @@
                 const savedData = localStorage.getItem('salesStockData');
                 if (savedData) {
                     data = JSON.parse(savedData);
-                    if (!data.salesHistory) {
-                        data.salesHistory = [];
-                    }
+                    if (!data.salesHistory) data.salesHistory = [];
+                    if (!data.profile) data.profile = { name: 'Seu Nome Aqui' };
                 }
+                ui.userName.textContent = data.profile.name;
                 populateMonthFilter();
                 updateUI();
             }
@@ -561,6 +645,24 @@
                 ui.totalRevenue.textContent = `R$ ${stats.totalRevenue.toFixed(2).replace('.', ',')}`;
                 ui.p25Sold.textContent = stats.p25_sold;
                 ui.p35Sold.textContent = stats.p35_sold;
+
+                // --- Daily Sales Calculation (independent of filter) ---
+                const today = new Date();
+                const todayKey = today.toLocaleDateString('pt-BR'); 
+                
+                const formattedDate = today.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+                ui.dailyRevenueTitle.innerHTML = `Vendas de Hoje <span style="font-weight: 400; color: var(--medium-gray);">(${formattedDate})</span>`;
+
+                const dailyRevenueTotal = data.salesHistory.reduce((acc, sale) => {
+                    const saleKey = new Date(sale.date).toLocaleDateString('pt-BR');
+                    if (saleKey === todayKey) {
+                        return acc + (sale.quantity * sale.price);
+                    }
+                    return acc;
+                }, 0);
+
+                ui.dailyRevenue.textContent = `R$ ${dailyRevenueTotal.toFixed(2).replace('.', ',')}`;
+
 
                 ui.stock25.textContent = data.stock.p25;
                 ui.stock35.textContent = data.stock.p35;
@@ -615,7 +717,10 @@
                             <strong>${products[sale.productId].name}</strong>
                             <div style="color: var(--medium-gray);">${sale.quantity} unid. &bull; ${formattedDate}</div>
                         </div>
-                        <div class="history-item-value">R$ ${totalValue}</div>
+                        <div class="history-item-actions">
+                            <span class="history-item-value">R$ ${totalValue}</span>
+                            <button class="delete-sale-btn" data-sale-id="${sale.date}" title="Excluir Venda">&times;</button>
+                        </div>
                     `;
                     ui.salesHistoryList.appendChild(li);
                 });
@@ -630,6 +735,65 @@
                     ui.messageBox.classList.remove('show');
                 }, 3000);
             }
+
+            function deleteSale(saleId) {
+                const saleIndex = data.salesHistory.findIndex(sale => sale.date === saleId);
+
+                if (saleIndex === -1) {
+                    showMessage('Erro: Venda não encontrada.', 'error');
+                    return;
+                }
+
+                const saleToDelete = data.salesHistory[saleIndex];
+                
+                // Restore stock
+                data.stock[saleToDelete.productId] += saleToDelete.quantity;
+
+                // Remove sale from history
+                data.salesHistory.splice(saleIndex, 1);
+
+                saveData();
+                populateMonthFilter(); // Update the filter in case the last sale of a month was deleted
+                updateUI();
+
+                showMessage('Venda excluída e estoque restaurado.', 'success');
+            }
+
+            // --- Profile Editing Logic ---
+            function setupProfileEditing() {
+                ui.userName.addEventListener('click', () => {
+                    const currentName = ui.userName.textContent;
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.className = 'user-name-input';
+                    input.value = currentName;
+
+                    const saveName = () => {
+                        const newName = input.value.trim();
+                        if (newName && newName !== data.profile.name) {
+                            data.profile.name = newName;
+                            saveData();
+                        }
+                        ui.userName.textContent = data.profile.name;
+                        ui.userNameWrapper.replaceChild(ui.userName, input);
+                    };
+
+                    input.addEventListener('blur', saveName);
+                    input.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') {
+                            input.blur();
+                        } else if (e.key === 'Escape') {
+                            input.value = data.profile.name;
+                            input.blur();
+                        }
+                    });
+
+                    ui.userNameWrapper.replaceChild(input, ui.userName);
+                    input.focus();
+                    input.select();
+                });
+            }
+
 
             // --- New Sale Modal Logic ---
             function openSaleModal() {
@@ -650,6 +814,14 @@
             ui.saleModal.addEventListener('click', (e) => {
                 if (e.target === ui.saleModal) {
                     closeSaleModal();
+                }
+            });
+
+            ui.salesHistoryList.addEventListener('click', (e) => {
+                const deleteButton = e.target.closest('.delete-sale-btn');
+                if (deleteButton) {
+                    const saleId = deleteButton.dataset.saleId;
+                    deleteSale(saleId);
                 }
             });
 
@@ -713,6 +885,7 @@
 
             // --- Initialization ---
             loadData();
+            setupProfileEditing();
         });
     </script>
 </body>

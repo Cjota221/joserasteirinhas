@@ -121,7 +121,7 @@
             width: 100%;
         }
         
-        .member-since-text {
+        .profile-subtext {
             font-size: 0.85rem;
             opacity: 0.7;
         }
@@ -542,8 +542,8 @@
                  <div id="user-name-wrapper">
                      <h2 id="user-name" class="user-name" title="Clique para editar">Seu Nome Aqui</h2>
                  </div>
-                 <p id="member-since" class="member-since-text"></p>
-                 <p class="motivational-quote">"Tudo posso naquele que me fortalece."</p>
+                 <p id="current-date" class="profile-subtext"></p>
+                 <p class="motivational-quote">"Seja forte e corajoso! (Josué 1:9) 🙏"</p>
             </div>
         </section>
 
@@ -701,8 +701,7 @@
             let data = {
                 profile: { 
                     name: 'Seu Nome Aqui', 
-                    photo: null,
-                    memberSince: null
+                    photo: null
                 },
                 stock: { p25: 0, p35: 0 },
                 salesHistory: [],
@@ -718,7 +717,7 @@
                 profileIcon: document.getElementById('profile-icon'),
                 userNameWrapper: document.getElementById('user-name-wrapper'),
                 userName: document.getElementById('user-name'),
-                memberSince: document.getElementById('member-since'),
+                currentDate: document.getElementById('current-date'),
                 totalPairsSold: document.getElementById('total-pairs-sold'),
                 totalRevenue: document.getElementById('total-revenue'),
                 p25Sold: document.getElementById('p25-sold'),
@@ -768,11 +767,7 @@
                     if (!data.salesHistory) data.salesHistory = [];
                     if (!data.stockHistory) data.stockHistory = [];
                     if (!data.stock) data.stock = { p25: 0, p35: 0 };
-                    if (!data.profile) data.profile = { name: 'Seu Nome Aqui', photo: null, memberSince: new Date().toISOString() };
-                    if (!data.profile.memberSince) data.profile.memberSince = new Date().toISOString();
-                } else {
-                    // First time loading the app
-                    data.profile.memberSince = new Date().toISOString();
+                    if (!data.profile) data.profile = { name: 'Seu Nome Aqui', photo: null };
                 }
                 
                 updateProfileUI();
@@ -796,9 +791,11 @@
                     ui.profileIcon.classList.remove('hidden');
                 }
                 
-                const memberSinceDate = new Date(data.profile.memberSince);
-                const formattedMemberSince = memberSinceDate.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
-                ui.memberSince.textContent = `Membro desde ${formattedMemberSince}`;
+                const today = new Date();
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                const formattedDate = today.toLocaleDateString('pt-BR', options);
+                const capitalizedDate = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
+                ui.currentDate.textContent = capitalizedDate;
             }
 
             function updateUI() {
@@ -1168,4 +1165,5 @@
     </script>
 </body>
 </html>
+
 

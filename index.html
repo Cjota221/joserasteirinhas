@@ -16,6 +16,7 @@
             --white: #FFFFFF;
             --danger: #D32F2F;
             --success: #388E3C;
+            --success-light: #4CAF50;
         }
 
         * {
@@ -125,6 +126,15 @@
             opacity: 0.7;
         }
 
+        .motivational-quote {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            font-style: italic;
+            margin-top: 0.5rem;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            padding-top: 0.5rem;
+        }
+
 
         /* Section Title */
         h2 {
@@ -146,7 +156,7 @@
             .dashboard-grid {
                 grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             }
-            .stock-grid {
+            .stock-grid, .stock-summary-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
@@ -196,6 +206,23 @@
         
         .editable-stock:hover .value::after {
             opacity: 1;
+        }
+        
+        /* Colored Cards */
+        .card.card-green, .card.card-blue {
+            color: var(--white);
+        }
+        .card.card-green h3, .card.card-blue h3 {
+            color: rgba(255, 255, 255, 0.85);
+        }
+        .card.card-green .value, .card.card-blue .value {
+            color: var(--white);
+        }
+        .card.card-green {
+            background: linear-gradient(45deg, var(--success), var(--success-light));
+        }
+        .card.card-blue {
+            background: linear-gradient(45deg, var(--dark-blue), var(--medium-blue));
         }
 
 
@@ -261,6 +288,59 @@
         
         .btn-secondary:hover {
             background-color: #9E9E9E;
+        }
+
+        /* Stock Management specific styles */
+        .stock-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            margin-top: 1rem;
+        }
+        
+        .stock-actions .input {
+            flex-grow: 1;
+        }
+
+        .stock-actions .btn {
+            width: auto;
+            padding: 0.8rem 1rem;
+            font-size: 1rem;
+            background-color: var(--success);
+            color: var(--white);
+            font-weight: 700;
+        }
+        
+        .stock-actions .btn:hover {
+             background-color: #2E7D32;
+        }
+        
+        .last-addition {
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--light-gray);
+            font-size: 0.9rem;
+            color: var(--medium-gray);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-undo {
+            background-color: transparent;
+            border: 1px solid var(--medium-gray);
+            color: var(--medium-gray);
+            padding: 0.25rem 0.6rem;
+            font-size: 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-undo:hover {
+            background-color: var(--danger);
+            color: var(--white);
+            border-color: var(--danger);
         }
         
         /* History List */
@@ -463,6 +543,7 @@
                      <h2 id="user-name" class="user-name" title="Clique para editar">Seu Nome Aqui</h2>
                  </div>
                  <p id="member-since" class="member-since-text"></p>
+                 <p class="motivational-quote">"Tudo posso naquele que me fortalece."</p>
             </div>
         </section>
 
@@ -486,7 +567,7 @@
                         <h3>Total Faturado</h3>
                         <p class="value" id="total-revenue">R$ 0,00</p>
                     </div>
-                     <div class="card">
+                     <div class="card card-green">
                         <h3 id="daily-revenue-title">Vendas de Hoje</h3>
                         <p class="value" id="daily-revenue">R$ 0,00</p>
                     </div>
@@ -504,18 +585,34 @@
             <!-- Stock Management Section -->
             <section id="stock" style="margin-top: 2rem;">
                 <h2>Gerenciar Estoque</h2>
-                <div class="card" style="margin-bottom: 1.5rem;">
-                    <h3>Valor Total em Estoque</h3>
-                    <p class="value" id="total-stock-value">R$ 0,00</p>
+                <div class="grid stock-summary-grid" style="margin-bottom: 1.5rem;">
+                     <div class="card card-blue">
+                        <h3>Valor Total em Estoque</h3>
+                        <p class="value" id="total-stock-value">R$ 0,00</p>
+                    </div>
+                    <div class="card">
+                        <h3>Total de Pares em Estoque</h3>
+                        <p class="value" id="total-stock-quantity">0</p>
+                    </div>
                 </div>
                 <div class="grid stock-grid">
-                    <div class="card editable-stock" data-product-id="p25">
+                    <div class="card editable-stock">
                         <h3>Rasteirinha (R$ 25,00)</h3>
-                        <p class="value" id="stock-25" title="Clique para editar o estoque">0</p>
+                        <p class="value" id="stock-25" title="Clique para editar o estoque" data-product-id="p25">0</p>
+                        <div class="stock-actions">
+                            <input type="number" id="add-stock-25" class="input" placeholder="Qtd." min="1">
+                            <button class="btn" onclick="addStock('p25')">Adicionar</button>
+                        </div>
+                        <div class="last-addition" id="last-addition-p25"></div>
                     </div>
-                    <div class="card editable-stock" data-product-id="p35">
+                    <div class="card editable-stock">
                         <h3>Rasteirinha (R$ 35,00)</h3>
-                        <p class="value" id="stock-35" title="Clique para editar o estoque">0</p>
+                        <p class="value" id="stock-35" title="Clique para editar o estoque" data-product-id="p35">0</p>
+                        <div class="stock-actions">
+                            <input type="number" id="add-stock-35" class="input" placeholder="Qtd." min="1">
+                            <button class="btn" onclick="addStock('p35')">Adicionar</button>
+                        </div>
+                        <div class="last-addition" id="last-addition-p35"></div>
                     </div>
                 </div>
             </section>
@@ -609,6 +706,7 @@
                 },
                 stock: { p25: 0, p35: 0 },
                 salesHistory: [],
+                stockHistory: [],
             };
             let selectedProductForSale = null;
             let selectedProductForStockEdit = null;
@@ -627,8 +725,12 @@
                 p35Sold: document.getElementById('p35-sold'),
                 stock25: document.getElementById('stock-25'),
                 stock35: document.getElementById('stock-35'),
-                editableStockCards: document.querySelectorAll('.editable-stock'),
+                addStock25Input: document.getElementById('add-stock-25'),
+                addStock35Input: document.getElementById('add-stock-35'),
+                lastAdditionP25: document.getElementById('last-addition-p25'),
+                lastAdditionP35: document.getElementById('last-addition-p35'),
                 totalStockValue: document.getElementById('total-stock-value'),
+                totalStockQuantity: document.getElementById('total-stock-quantity'),
                 messageBox: document.getElementById('message-box'),
                 monthFilter: document.getElementById('month-filter'),
                 salesHistoryList: document.getElementById('sales-history-list'),
@@ -664,6 +766,7 @@
                     data = JSON.parse(savedData);
                     // Basic data sanitation for forward compatibility
                     if (!data.salesHistory) data.salesHistory = [];
+                    if (!data.stockHistory) data.stockHistory = [];
                     if (!data.stock) data.stock = { p25: 0, p35: 0 };
                     if (!data.profile) data.profile = { name: 'Seu Nome Aqui', photo: null, memberSince: new Date().toISOString() };
                     if (!data.profile.memberSince) data.profile.memberSince = new Date().toISOString();
@@ -728,7 +831,7 @@
                 const todayKey = today.toLocaleDateString('pt-BR'); 
                 
                 const formattedDate = today.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-                ui.dailyRevenueTitle.innerHTML = `Vendas de Hoje <span style="font-weight: 400; color: var(--medium-gray);">(${formattedDate})</span>`;
+                ui.dailyRevenueTitle.innerHTML = `Vendas de Hoje <span style="font-weight: 400; color: rgba(255,255,255,0.8);">${formattedDate}</span>`;
 
                 const dailyRevenueTotal = data.salesHistory.reduce((acc, sale) => {
                     const saleKey = new Date(sale.date).toLocaleDateString('pt-BR');
@@ -745,8 +848,36 @@
                 ui.stock35.textContent = data.stock.p35;
                 const totalStockValue = (data.stock.p25 * products.p25.price) + (data.stock.p35 * products.p35.price);
                 ui.totalStockValue.textContent = `R$ ${totalStockValue.toFixed(2).replace('.', ',')}`;
+                const totalStockQuantity = data.stock.p25 + data.stock.p35;
+                ui.totalStockQuantity.textContent = totalStockQuantity;
                 
                 renderSalesHistory(filteredSales);
+                renderLastAdditions();
+            }
+
+            function renderLastAdditions() {
+                const lastAdditionP25 = [...data.stockHistory].filter(item => item.productId === 'p25').pop();
+                const lastAdditionP35 = [...data.stockHistory].filter(item => item.productId === 'p35').pop();
+                
+                ui.lastAdditionP25.innerHTML = '';
+                if(lastAdditionP25) {
+                    const date = new Date(lastAdditionP25.date);
+                    const formattedDate = date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+                    ui.lastAdditionP25.innerHTML = `
+                        <span>Última adição: <strong>+${lastAdditionP25.quantity}</strong> em ${formattedDate}</span>
+                        <button class="btn-undo" onclick="undoLastStockAddition('p25')">Desfazer</button>
+                    `;
+                }
+                
+                ui.lastAdditionP35.innerHTML = '';
+                 if(lastAdditionP35) {
+                    const date = new Date(lastAdditionP35.date);
+                    const formattedDate = date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+                    ui.lastAdditionP35.innerHTML = `
+                       <span>Última adição: <strong>+${lastAdditionP35.quantity}</strong> em ${formattedDate}</span>
+                       <button class="btn-undo" onclick="undoLastStockAddition('p35')">Desfazer</button>
+                    `;
+                }
             }
             
             function populateMonthFilter() {
@@ -953,9 +1084,9 @@
             ui.monthFilter.addEventListener('change', updateUI);
             
             // Edit Stock Events
-            ui.editableStockCards.forEach(card => {
-                card.addEventListener('click', () => {
-                    const productId = card.dataset.productId;
+            document.querySelectorAll('.editable-stock .value').forEach(el => {
+                el.addEventListener('click', (e) => {
+                    const productId = e.target.dataset.productId;
                     openEditStockModal(productId);
                 });
             });
@@ -978,6 +1109,55 @@
                 showMessage('Estoque atualizado com sucesso!', 'success');
                 closeEditStockModal();
             });
+
+            window.addStock = (productId) => {
+                const inputElement = (productId === 'p25') ? ui.addStock25Input : ui.addStock35Input;
+                const quantity = parseInt(inputElement.value, 10);
+
+                if (isNaN(quantity) || quantity <= 0) {
+                    showMessage('Por favor, insira uma quantidade válida para adicionar.', 'error');
+                    return;
+                }
+                data.stock[productId] += quantity;
+                
+                data.stockHistory.push({
+                    productId: productId,
+                    quantity: quantity,
+                    date: new Date().toISOString()
+                });
+                
+                saveData();
+                updateUI();
+                showMessage(`${quantity} unidade(s) adicionada(s) ao estoque.`, 'success');
+                inputElement.value = '';
+            }
+            
+            window.undoLastStockAddition = (productId) => {
+                const stockAdditionsForProduct = data.stockHistory.filter(item => item.productId === productId);
+                if (stockAdditionsForProduct.length === 0) {
+                    showMessage('Nenhuma adição para desfazer.', 'error');
+                    return;
+                }
+
+                const lastAddition = stockAdditionsForProduct[stockAdditionsForProduct.length - 1];
+                
+                if (data.stock[productId] < lastAddition.quantity) {
+                     showMessage('Não é possível desfazer. Itens desta adição já foram vendidos.', 'error');
+                     return;
+                }
+                
+                const itemIndex = data.stockHistory.findLastIndex(item => 
+                    item.date === lastAddition.date && item.productId === lastAddition.productId
+                );
+
+                if (itemIndex > -1) {
+                    data.stock[productId] -= lastAddition.quantity;
+                    data.stockHistory.splice(itemIndex, 1);
+                    saveData();
+                    updateUI();
+                    showMessage('Última adição desfeita com sucesso!', 'success');
+                }
+            }
 
 
             // --- Initialization ---

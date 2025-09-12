@@ -167,12 +167,12 @@
         }
         
         .btn-secondary {
-            background-color: var(--medium-blue);
+            background-color: var(--medium-gray);
             color: var(--white);
         }
         
         .btn-secondary:hover {
-            background-color: #5C6BC0; /* A lighter shade of medium-blue */
+            background-color: #9E9E9E;
         }
         
         /* Stock Management specific styles */
@@ -191,9 +191,53 @@
             width: auto;
             padding: 0.8rem 1rem;
             font-size: 1rem;
+            background-color: var(--medium-blue);
+        }
+        
+        .stock-actions .btn:hover {
+             background-color: #5C6BC0;
         }
 
-        /* Initial Setup Modal */
+        /* History List */
+        .history-list {
+            list-style: none;
+            margin-top: 1.5rem;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #E0E0E0;
+            border-radius: 8px;
+        }
+
+        .history-list li {
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #E0E0E0;
+        }
+        
+        .history-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .history-list li:nth-child(odd) {
+            background-color: #F9F9F9;
+        }
+
+        .history-item-details {
+            font-size: 0.9rem;
+        }
+
+        .history-item-details strong {
+            color: var(--dark-blue);
+        }
+
+        .history-item-value {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        /* Sale Modal */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -206,6 +250,14 @@
             align-items: center;
             z-index: 1000;
             padding: 1rem;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
         }
 
         .modal-content {
@@ -213,9 +265,58 @@
             padding: 2rem;
             border-radius: 12px;
             width: 100%;
-            max-width: 400px;
+            max-width: 450px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
         }
+        
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: var(--medium-gray);
+            cursor: pointer;
+        }
+        
+        .product-selection-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .btn-product {
+            background-color: var(--white);
+            border: 2px solid var(--light-blue);
+            border-radius: 8px;
+            padding: 1.5rem 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-product:hover {
+            background-color: var(--light-gray);
+            border-color: var(--medium-blue);
+        }
+        
+        .btn-product strong {
+            font-size: 1.1rem;
+            color: var(--dark-gray);
+        }
+        
+        .btn-product span {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark-blue);
+            margin-top: 0.5rem;
+        }
+
 
         .hidden {
             display: none;
@@ -254,25 +355,6 @@
     </style>
 </head>
 <body>
-
-    <!-- Modal for Initial Stock Setup -->
-    <div id="initial-stock-modal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <h2>Estoque Inicial</h2>
-            <p style="margin-bottom: 1.5rem; color: var(--medium-gray);">Defina a quantidade inicial de peças para cada produto.</p>
-            <form id="initial-stock-form">
-                <div class="form-group">
-                    <label for="initial-stock-25">Rasteirinha (R$ 25,00)</label>
-                    <input type="number" id="initial-stock-25" class="input" placeholder="Qtd." min="0" required>
-                </div>
-                <div class="form-group">
-                    <label for="initial-stock-35">Rasteirinha (R$ 35,00)</label>
-                    <input type="number" id="initial-stock-35" class="input" placeholder="Qtd." min="0" required>
-                </div>
-                <button type="submit" class="btn btn-primary">Salvar Estoque</button>
-            </form>
-        </div>
-    </div>
     
     <header>
         <h1>Sistema de Vendas e Estoque</h1>
@@ -280,8 +362,15 @@
 
     <div class="container">
         <main>
+             <!-- Actions Section -->
+            <section id="actions">
+                 <button class="btn btn-primary" id="new-sale-btn" style="padding: 1.25rem; font-size: 1.25rem;">
+                    &#43; Nova Venda
+                </button>
+            </section>
+
             <!-- Dashboard Section -->
-            <section id="dashboard">
+            <section id="dashboard" style="margin-top: 2rem;">
                 <h2>Dashboard</h2>
                 <div class="grid dashboard-grid">
                     <div class="card">
@@ -316,7 +405,7 @@
                         <p class="value" id="stock-25">0</p>
                         <div class="stock-actions">
                             <input type="number" id="add-stock-25" class="input" placeholder="Qtd." min="1">
-                            <button class="btn btn-secondary" onclick="addStock('p25')">Adicionar</button>
+                            <button class="btn" onclick="addStock('p25')">Adicionar</button>
                         </div>
                     </div>
                     <div class="card">
@@ -324,36 +413,65 @@
                         <p class="value" id="stock-35">0</p>
                          <div class="stock-actions">
                             <input type="number" id="add-stock-35" class="input" placeholder="Qtd." min="1">
-                            <button class="btn btn-secondary" onclick="addStock('p35')">Adicionar</button>
+                            <button class="btn" onclick="addStock('p35')">Adicionar</button>
                         </div>
                     </div>
                 </div>
             </section>
-            
-            <!-- Sales Registration Section -->
-            <section id="sales" style="margin-top: 2rem;">
-                <h2>Registrar Venda</h2>
+
+            <!-- Sales History Section -->
+            <section id="history" style="margin-top: 2rem;">
+                <h2>Histórico de Vendas</h2>
                 <div class="card">
-                    <form id="sale-form">
-                        <div class="form-group">
-                            <label for="product-select">Produto</label>
-                            <select id="product-select" class="select" required>
-                                <option value="" disabled selected>Selecione um produto</option>
-                                <option value="p25">Rasteirinha (R$ 25,00)</option>
-                                <option value="p35">Rasteirinha (R$ 35,00)</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="sale-quantity">Quantidade</label>
-                            <input type="number" id="sale-quantity" class="input" placeholder="Qtd." min="1" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Registrar Venda</button>
-                    </form>
+                    <div class="form-group">
+                        <label for="month-filter">Filtrar por Mês</label>
+                        <select id="month-filter" class="select"></select>
+                    </div>
+                    <ul id="sales-history-list" class="history-list">
+                       <!-- Sales items will be injected here by JS -->
+                    </ul>
+                     <p id="no-sales-message" style="text-align: center; color: var(--medium-gray); margin-top: 1.5rem; display: none;">Nenhuma venda registrada para este período.</p>
                 </div>
             </section>
         </main>
     </div>
     
+    <!-- New Sale Modal -->
+    <div id="sale-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="close-btn" id="close-modal-btn">&times;</button>
+            
+            <!-- Step 1: Product Selection -->
+            <div id="sale-step-1">
+                <h2 style="margin-bottom: 0.5rem;">Nova Venda</h2>
+                <p style="margin-bottom: 1.5rem; color: var(--medium-gray);">Selecione o produto vendido:</p>
+                <div class="product-selection-grid">
+                     <button class="btn-product" data-product="p25">
+                        <strong>Rasteirinha</strong>
+                        <span>R$ 25,00</span>
+                     </button>
+                     <button class="btn-product" data-product="p35">
+                        <strong>Rasteirinha</strong>
+                        <span>R$ 35,00</span>
+                     </button>
+                </div>
+            </div>
+
+            <!-- Step 2: Quantity Input -->
+            <div id="sale-step-2" class="hidden">
+                <h2 id="sale-product-title"></h2>
+                <form id="sale-quantity-form">
+                    <div class="form-group">
+                        <label for="modal-sale-quantity">Quantidade Vendida</label>
+                        <input type="number" id="modal-sale-quantity" class="input" placeholder="Qtd." min="1" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Registrar Venda</button>
+                    <button type="button" id="back-to-products-btn" class="btn btn-secondary" style="margin-top: 0.5rem;">Voltar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Custom Message/Alert Box -->
     <div id="message-box"></div>
 
@@ -368,8 +486,9 @@
             // --- State Management ---
             let data = {
                 stock: { p25: 0, p35: 0 },
-                sales: { totalPairs: 0, totalRevenue: 0, p25_sold: 0, p35_sold: 0 }
+                salesHistory: []
             };
+            let selectedProductForSale = null;
 
             // --- DOM Elements ---
             const ui = {
@@ -382,64 +501,129 @@
                 addStock25Input: document.getElementById('add-stock-25'),
                 addStock35Input: document.getElementById('add-stock-35'),
                 totalStockValue: document.getElementById('total-stock-value'),
-                saleForm: document.getElementById('sale-form'),
-                productSelect: document.getElementById('product-select'),
-                saleQuantityInput: document.getElementById('sale-quantity'),
-                initialStockModal: document.getElementById('initial-stock-modal'),
-                initialStockForm: document.getElementById('initial-stock-form'),
-                initialStock25Input: document.getElementById('initial-stock-25'),
-                initialStock35Input: document.getElementById('initial-stock-35'),
-                messageBox: document.getElementById('message-box')
+                messageBox: document.getElementById('message-box'),
+                monthFilter: document.getElementById('month-filter'),
+                salesHistoryList: document.getElementById('sales-history-list'),
+                noSalesMessage: document.getElementById('no-sales-message'),
+                
+                // New Sale Flow UI
+                newSaleBtn: document.getElementById('new-sale-btn'),
+                saleModal: document.getElementById('sale-modal'),
+                closeModalBtn: document.getElementById('close-modal-btn'),
+                saleStep1: document.getElementById('sale-step-1'),
+                saleStep2: document.getElementById('sale-step-2'),
+                productSelectionButtons: document.querySelectorAll('.btn-product'),
+                saleProductTitle: document.getElementById('sale-product-title'),
+                saleQuantityForm: document.getElementById('sale-quantity-form'),
+                modalSaleQuantityInput: document.getElementById('modal-sale-quantity'),
+                backToProductsBtn: document.getElementById('back-to-products-btn')
             };
 
             // --- Core Functions ---
 
-            /**
-             * Loads data from localStorage or shows the initial setup modal.
-             */
             function loadData() {
                 const savedData = localStorage.getItem('salesStockData');
                 if (savedData) {
                     data = JSON.parse(savedData);
-                } else {
-                    ui.initialStockModal.classList.remove('hidden');
+                    if (!data.salesHistory) {
+                        data.salesHistory = [];
+                    }
                 }
+                populateMonthFilter();
                 updateUI();
             }
 
-            /**
-             * Saves the current state to localStorage.
-             */
             function saveData() {
                 localStorage.setItem('salesStockData', JSON.stringify(data));
             }
 
-            /**
-             * Updates all visible elements on the page with current data.
-             */
             function updateUI() {
-                // Dashboard
-                ui.totalPairsSold.textContent = data.sales.totalPairs;
-                ui.totalRevenue.textContent = `R$ ${data.sales.totalRevenue.toFixed(2).replace('.', ',')}`;
-                ui.p25Sold.textContent = data.sales.p25_sold;
-                ui.p35Sold.textContent = data.sales.p35_sold;
-                // Stock
+                const selectedMonth = ui.monthFilter.value;
+                let filteredSales = data.salesHistory;
+
+                if (selectedMonth !== 'all' && selectedMonth) {
+                    filteredSales = data.salesHistory.filter(sale => {
+                        const saleDate = new Date(sale.date);
+                        const saleMonthYear = `${saleDate.getFullYear()}-${String(saleDate.getMonth() + 1).padStart(2, '0')}`;
+                        return saleMonthYear === selectedMonth;
+                    });
+                }
+                
+                const stats = filteredSales.reduce((acc, sale) => {
+                    acc.totalPairs += sale.quantity;
+                    acc.totalRevenue += sale.quantity * sale.price;
+                    if (sale.productId === 'p25') acc.p25_sold += sale.quantity;
+                    if (sale.productId === 'p35') acc.p35_sold += sale.quantity;
+                    return acc;
+                }, { totalPairs: 0, totalRevenue: 0, p25_sold: 0, p35_sold: 0 });
+
+                ui.totalPairsSold.textContent = stats.totalPairs;
+                ui.totalRevenue.textContent = `R$ ${stats.totalRevenue.toFixed(2).replace('.', ',')}`;
+                ui.p25Sold.textContent = stats.p25_sold;
+                ui.p35Sold.textContent = stats.p35_sold;
+
                 ui.stock25.textContent = data.stock.p25;
                 ui.stock35.textContent = data.stock.p35;
-
-                // Calcula e exibe o valor total do estoque
                 const totalStockValue = (data.stock.p25 * products.p25.price) + (data.stock.p35 * products.p35.price);
                 ui.totalStockValue.textContent = `R$ ${totalStockValue.toFixed(2).replace('.', ',')}`;
+                
+                renderSalesHistory(filteredSales);
+            }
+            
+            function populateMonthFilter() {
+                const months = new Set();
+                data.salesHistory.forEach(sale => {
+                    const saleDate = new Date(sale.date);
+                    const monthYear = `${saleDate.getFullYear()}-${String(saleDate.getMonth() + 1).padStart(2, '0')}`;
+                    months.add(monthYear);
+                });
+
+                const currentFilterValue = ui.monthFilter.value;
+                ui.monthFilter.innerHTML = '<option value="all">Todos os Meses</option>';
+                const sortedMonths = Array.from(months).sort().reverse();
+                
+                sortedMonths.forEach(month => {
+                    const [year, monthNum] = month.split('-');
+                    const monthName = new Date(year, monthNum - 1).toLocaleString('pt-BR', { month: 'long' });
+                    const option = document.createElement('option');
+                    option.value = month;
+                    option.textContent = `${monthName.charAt(0).toUpperCase() + monthName.slice(1)}/${year}`;
+                    ui.monthFilter.appendChild(option);
+                });
+                ui.monthFilter.value = currentFilterValue || 'all';
             }
 
-            /**
-             * Shows a custom message at the bottom of the screen.
-             * @param {string} message The text to display.
-             * @param {string} type 'success' or 'error'.
-             */
+            function renderSalesHistory(sales) {
+                ui.salesHistoryList.innerHTML = '';
+                if (sales.length === 0) {
+                    ui.noSalesMessage.style.display = 'block';
+                    ui.salesHistoryList.style.display = 'none';
+                    return;
+                }
+                
+                ui.noSalesMessage.style.display = 'none';
+                ui.salesHistoryList.style.display = 'block';
+
+                sales.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(sale => {
+                    const li = document.createElement('li');
+                    const saleDate = new Date(sale.date);
+                    const formattedDate = saleDate.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                    const totalValue = (sale.quantity * sale.price).toFixed(2).replace('.', ',');
+
+                    li.innerHTML = `
+                        <div class="history-item-details">
+                            <strong>${products[sale.productId].name}</strong>
+                            <div style="color: var(--medium-gray);">${sale.quantity} unid. &bull; ${formattedDate}</div>
+                        </div>
+                        <div class="history-item-value">R$ ${totalValue}</div>
+                    `;
+                    ui.salesHistoryList.appendChild(li);
+                });
+            }
+
             function showMessage(message, type = 'success') {
                 ui.messageBox.textContent = message;
-                ui.messageBox.className = type; // Removes previous classes
+                ui.messageBox.className = type;
                 ui.messageBox.classList.add('show');
                 
                 setTimeout(() => {
@@ -447,71 +631,71 @@
                 }, 3000);
             }
 
+            // --- New Sale Modal Logic ---
+            function openSaleModal() {
+                ui.saleStep1.classList.remove('hidden');
+                ui.saleStep2.classList.add('hidden');
+                ui.saleModal.classList.add('show');
+            }
+
+            function closeSaleModal() {
+                ui.saleModal.classList.remove('show');
+                ui.saleQuantityForm.reset();
+                selectedProductForSale = null;
+            }
+
             // --- Event Handlers ---
-
-            /**
-             * Handles the initial stock form submission.
-             */
-            ui.initialStockForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const stock25 = parseInt(ui.initialStock25Input.value, 10);
-                const stock35 = parseInt(ui.initialStock35Input.value, 10);
-
-                if (isNaN(stock25) || stock25 < 0 || isNaN(stock35) || stock35 < 0) {
-                    showMessage('Por favor, insira valores válidos.', 'error');
-                    return;
+            ui.newSaleBtn.addEventListener('click', openSaleModal);
+            ui.closeModalBtn.addEventListener('click', closeSaleModal);
+            ui.saleModal.addEventListener('click', (e) => {
+                if (e.target === ui.saleModal) {
+                    closeSaleModal();
                 }
-                
-                data.stock.p25 = stock25;
-                data.stock.p35 = stock35;
-                
-                saveData();
-                updateUI();
-                
-                ui.initialStockModal.classList.add('hidden');
-                showMessage('Estoque inicial salvo com sucesso!', 'success');
             });
 
+            ui.productSelectionButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    selectedProductForSale = btn.dataset.product;
+                    ui.saleProductTitle.textContent = `Venda de ${products[selectedProductForSale].name}`;
+                    ui.saleStep1.classList.add('hidden');
+                    ui.saleStep2.classList.remove('hidden');
+                    ui.modalSaleQuantityInput.focus();
+                });
+            });
 
-            /**
-             * Handles the sale registration form submission.
-             */
-            ui.saleForm.addEventListener('submit', (e) => {
+            ui.backToProductsBtn.addEventListener('click', () => {
+                ui.saleStep2.classList.add('hidden');
+                ui.saleStep1.classList.remove('hidden');
+                ui.saleQuantityForm.reset();
+                selectedProductForSale = null;
+            });
+
+            ui.saleQuantityForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 
-                const productId = ui.productSelect.value;
-                const quantity = parseInt(ui.saleQuantityInput.value, 10);
+                const productId = selectedProductForSale;
+                const quantity = parseInt(ui.modalSaleQuantityInput.value, 10);
                 
-                if (!productId) {
-                    showMessage('Por favor, selecione um produto.', 'error');
-                    return;
-                }
+                if (!productId) { return; } // Should not happen
+                if (isNaN(quantity) || quantity <= 0) { showMessage('Por favor, insira uma quantidade válida.', 'error'); return; }
+                if (quantity > data.stock[productId]) { showMessage('Venda não realizada. Estoque insuficiente!', 'error'); return; }
                 
-                if (isNaN(quantity) || quantity <= 0) {
-                    showMessage('Por favor, insira uma quantidade válida.', 'error');
-                    return;
-                }
-
-                if (quantity > data.stock[productId]) {
-                    showMessage('Venda não realizada. Estoque insuficiente!', 'error');
-                    return;
-                }
-                
-                // Update state
                 const product = products[productId];
                 data.stock[productId] -= quantity;
-                data.sales.totalPairs += quantity;
-                data.sales.totalRevenue += product.price * quantity;
-                data.sales[`${productId}_sold`] += quantity;
+
+                const saleRecord = { productId, quantity, price: product.price, date: new Date().toISOString() };
+                data.salesHistory.push(saleRecord);
                 
+                populateMonthFilter();
                 saveData();
                 updateUI();
                 
                 showMessage(`Venda de ${quantity} ${product.name}(s) registrada!`, 'success');
-                ui.saleForm.reset();
+                closeSaleModal();
             });
+            
+            ui.monthFilter.addEventListener('change', updateUI);
 
-            // Make addStock function globally accessible for the inline onclick handler
             window.addStock = (productId) => {
                 const inputElement = (productId === 'p25') ? ui.addStock25Input : ui.addStock35Input;
                 const quantity = parseInt(inputElement.value, 10);
@@ -520,12 +704,9 @@
                     showMessage('Por favor, insira uma quantidade válida para adicionar.', 'error');
                     return;
                 }
-
                 data.stock[productId] += quantity;
-                
                 saveData();
                 updateUI();
-                
                 showMessage(`${quantity} unidade(s) adicionada(s) ao estoque.`, 'success');
                 inputElement.value = '';
             }

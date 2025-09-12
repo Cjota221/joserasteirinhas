@@ -56,17 +56,18 @@
         .profile-section {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            background-color: var(--white);
-            padding: 1rem 1.5rem;
+            gap: 1.5rem;
+            background: linear-gradient(45deg, var(--dark-blue), var(--medium-blue));
+            color: var(--white);
+            padding: 1.5rem;
             border-radius: 12px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             margin-top: 2rem;
         }
 
         .photo-circle {
-            width: 70px;
-            height: 70px;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
             background-color: var(--light-blue);
             display: flex;
@@ -77,6 +78,7 @@
             cursor: pointer;
             overflow: hidden;
             position: relative;
+            border: 3px solid var(--white);
         }
         
         .photo-circle img {
@@ -84,11 +86,22 @@
             height: 100%;
             object-fit: cover;
         }
+        
+        .profile-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
 
+        .welcome-text {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+        
         .user-name {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--dark-blue);
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--white);
             border: none;
             padding-bottom: 0;
             cursor: pointer;
@@ -97,14 +110,19 @@
 
         .user-name-input {
             font-family: inherit;
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--dark-blue);
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--white);
             border: none;
-            border-bottom: 2px solid var(--dark-blue);
+            border-bottom: 2px solid var(--white);
             outline: none;
             background: transparent;
             width: 100%;
+        }
+        
+        .member-since-text {
+            font-size: 0.85rem;
+            opacity: 0.7;
         }
 
 
@@ -159,6 +177,27 @@
             font-weight: 700;
             color: var(--dark-blue);
         }
+        
+        .editable-stock .value {
+            cursor: pointer;
+            position: relative;
+            display: inline-block;
+        }
+
+        .editable-stock .value::after {
+            content: '✏️';
+            font-size: 1rem;
+            position: absolute;
+            top: 5px;
+            right: -25px;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+        
+        .editable-stock:hover .value::after {
+            opacity: 1;
+        }
+
 
         /* Form Elements */
         .form-group {
@@ -224,59 +263,6 @@
             background-color: #9E9E9E;
         }
         
-        /* Stock Management specific styles */
-        .stock-actions {
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-            margin-top: 1rem;
-        }
-        
-        .stock-actions .input {
-            flex-grow: 1;
-        }
-
-        .stock-actions .btn {
-            width: auto;
-            padding: 0.8rem 1rem;
-            font-size: 1rem;
-            background-color: var(--success); /* Alterado para verde para melhor visibilidade */
-            color: var(--white); /* Adicionado para garantir o texto branco */
-            font-weight: 700; /* Texto em negrito */
-        }
-        
-        .stock-actions .btn:hover {
-             background-color: #2E7D32; /* Verde mais escuro ao passar o mouse */
-        }
-        
-        .last-addition {
-            margin-top: 1.5rem;
-            padding-top: 1rem;
-            border-top: 1px solid var(--light-gray);
-            font-size: 0.9rem;
-            color: var(--medium-gray);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .btn-undo {
-            background-color: transparent;
-            border: 1px solid var(--medium-gray);
-            color: var(--medium-gray);
-            padding: 0.25rem 0.6rem;
-            font-size: 0.8rem;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-undo:hover {
-            background-color: var(--danger);
-            color: var(--white);
-            border-color: var(--danger);
-        }
-
         /* History List */
         .history-list {
             list-style: none;
@@ -338,7 +324,7 @@
             background-color: #FFCDD2; /* Light red */
         }
 
-        /* Sale Modal */
+        /* Modals */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -466,13 +452,17 @@
         <section class="profile-section">
             <label for="photo-upload" class="photo-circle" title="Clique para alterar a foto">
                 <img id="profile-image" class="hidden" alt="Foto de Perfil">
-                <svg id="profile-icon" xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="currentColor" viewBox="0 0 16 16">
+                <svg id="profile-icon" xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" viewBox="0 0 16 16">
                     <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
                 </svg>
             </label>
             <input type="file" id="photo-upload" class="hidden" accept="image/*">
-            <div id="user-name-wrapper">
-                 <h2 id="user-name" class="user-name" title="Clique para editar">Seu Nome Aqui</h2>
+            <div class="profile-info">
+                 <p class="welcome-text">Olá,</p>
+                 <div id="user-name-wrapper">
+                     <h2 id="user-name" class="user-name" title="Clique para editar">Seu Nome Aqui</h2>
+                 </div>
+                 <p id="member-since" class="member-since-text"></p>
             </div>
         </section>
 
@@ -519,23 +509,13 @@
                     <p class="value" id="total-stock-value">R$ 0,00</p>
                 </div>
                 <div class="grid stock-grid">
-                    <div class="card">
+                    <div class="card editable-stock" data-product-id="p25">
                         <h3>Rasteirinha (R$ 25,00)</h3>
-                        <p class="value" id="stock-25">0</p>
-                        <div class="stock-actions">
-                            <input type="number" id="add-stock-25" class="input" placeholder="Qtd." min="1">
-                            <button class="btn" onclick="addStock('p25')">Adicionar</button>
-                        </div>
-                        <div class="last-addition" id="last-addition-p25"></div>
+                        <p class="value" id="stock-25" title="Clique para editar o estoque">0</p>
                     </div>
-                    <div class="card">
+                    <div class="card editable-stock" data-product-id="p35">
                         <h3>Rasteirinha (R$ 35,00)</h3>
-                        <p class="value" id="stock-35">0</p>
-                         <div class="stock-actions">
-                            <input type="number" id="add-stock-35" class="input" placeholder="Qtd." min="1">
-                            <button class="btn" onclick="addStock('p35')">Adicionar</button>
-                        </div>
-                        <div class="last-addition" id="last-addition-p35"></div>
+                        <p class="value" id="stock-35" title="Clique para editar o estoque">0</p>
                     </div>
                 </div>
             </section>
@@ -592,6 +572,22 @@
             </div>
         </div>
     </div>
+    
+    <!-- Edit Stock Modal -->
+    <div id="edit-stock-modal" class="modal-overlay">
+        <div class="modal-content">
+             <button class="close-btn" id="close-edit-stock-modal-btn">&times;</button>
+             <h2 id="edit-stock-product-title"></h2>
+             <form id="edit-stock-form">
+                <div class="form-group">
+                    <label for="edit-stock-quantity">Nova Quantidade em Estoque</label>
+                    <input type="number" id="edit-stock-quantity" class="input" placeholder="Qtd." min="0" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Salvar Estoque</button>
+             </form>
+        </div>
+    </div>
+
 
     <!-- Custom Message/Alert Box -->
     <div id="message-box"></div>
@@ -606,12 +602,16 @@
 
             // --- State Management ---
             let data = {
-                profile: { name: 'Seu Nome Aqui', photo: null },
+                profile: { 
+                    name: 'Seu Nome Aqui', 
+                    photo: null,
+                    memberSince: null
+                },
                 stock: { p25: 0, p35: 0 },
                 salesHistory: [],
-                stockHistory: []
             };
             let selectedProductForSale = null;
+            let selectedProductForStockEdit = null;
 
             // --- DOM Elements ---
             const ui = {
@@ -620,14 +620,14 @@
                 profileIcon: document.getElementById('profile-icon'),
                 userNameWrapper: document.getElementById('user-name-wrapper'),
                 userName: document.getElementById('user-name'),
+                memberSince: document.getElementById('member-since'),
                 totalPairsSold: document.getElementById('total-pairs-sold'),
                 totalRevenue: document.getElementById('total-revenue'),
                 p25Sold: document.getElementById('p25-sold'),
                 p35Sold: document.getElementById('p35-sold'),
                 stock25: document.getElementById('stock-25'),
                 stock35: document.getElementById('stock-35'),
-                addStock25Input: document.getElementById('add-stock-25'),
-                addStock35Input: document.getElementById('add-stock-35'),
+                editableStockCards: document.querySelectorAll('.editable-stock'),
                 totalStockValue: document.getElementById('total-stock-value'),
                 messageBox: document.getElementById('message-box'),
                 monthFilter: document.getElementById('month-filter'),
@@ -635,10 +635,8 @@
                 noSalesMessage: document.getElementById('no-sales-message'),
                 dailyRevenue: document.getElementById('daily-revenue'),
                 dailyRevenueTitle: document.getElementById('daily-revenue-title'),
-                lastAdditionP25: document.getElementById('last-addition-p25'),
-                lastAdditionP35: document.getElementById('last-addition-p35'),
                 
-                // New Sale Flow UI
+                // Sale Modal UI
                 newSaleBtn: document.getElementById('new-sale-btn'),
                 saleModal: document.getElementById('sale-modal'),
                 closeModalBtn: document.getElementById('close-modal-btn'),
@@ -648,7 +646,14 @@
                 saleProductTitle: document.getElementById('sale-product-title'),
                 saleQuantityForm: document.getElementById('sale-quantity-form'),
                 modalSaleQuantityInput: document.getElementById('modal-sale-quantity'),
-                backToProductsBtn: document.getElementById('back-to-products-btn')
+                backToProductsBtn: document.getElementById('back-to-products-btn'),
+                
+                // Edit Stock Modal UI
+                editStockModal: document.getElementById('edit-stock-modal'),
+                closeEditStockModalBtn: document.getElementById('close-edit-stock-modal-btn'),
+                editStockProductTitle: document.getElementById('edit-stock-product-title'),
+                editStockForm: document.getElementById('edit-stock-form'),
+                editStockQuantityInput: document.getElementById('edit-stock-quantity')
             };
 
             // --- Core Functions ---
@@ -657,19 +662,40 @@
                 const savedData = localStorage.getItem('salesStockData');
                 if (savedData) {
                     data = JSON.parse(savedData);
+                    // Basic data sanitation for forward compatibility
                     if (!data.salesHistory) data.salesHistory = [];
-                    if (!data.stockHistory) data.stockHistory = [];
-                    if (!data.profile) data.profile = { name: 'Seu Nome Aqui', photo: null };
-                    if (data.profile.photo === undefined) data.profile.photo = null;
+                    if (!data.stock) data.stock = { p25: 0, p35: 0 };
+                    if (!data.profile) data.profile = { name: 'Seu Nome Aqui', photo: null, memberSince: new Date().toISOString() };
+                    if (!data.profile.memberSince) data.profile.memberSince = new Date().toISOString();
+                } else {
+                    // First time loading the app
+                    data.profile.memberSince = new Date().toISOString();
                 }
-                ui.userName.textContent = data.profile.name;
-                updateProfilePhoto();
+                
+                updateProfileUI();
                 populateMonthFilter();
                 updateUI();
             }
 
             function saveData() {
                 localStorage.setItem('salesStockData', JSON.stringify(data));
+            }
+            
+            function updateProfileUI() {
+                ui.userName.textContent = data.profile.name;
+                
+                if (data.profile.photo) {
+                    ui.profileImage.src = data.profile.photo;
+                    ui.profileImage.classList.remove('hidden');
+                    ui.profileIcon.classList.add('hidden');
+                } else {
+                    ui.profileImage.classList.add('hidden');
+                    ui.profileIcon.classList.remove('hidden');
+                }
+                
+                const memberSinceDate = new Date(data.profile.memberSince);
+                const formattedMemberSince = memberSinceDate.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+                ui.memberSince.textContent = `Membro desde ${formattedMemberSince}`;
             }
 
             function updateUI() {
@@ -721,32 +747,6 @@
                 ui.totalStockValue.textContent = `R$ ${totalStockValue.toFixed(2).replace('.', ',')}`;
                 
                 renderSalesHistory(filteredSales);
-                renderLastAdditions();
-            }
-            
-            function renderLastAdditions() {
-                const lastAdditionP25 = [...data.stockHistory].filter(item => item.productId === 'p25').pop();
-                const lastAdditionP35 = [...data.stockHistory].filter(item => item.productId === 'p35').pop();
-                
-                ui.lastAdditionP25.innerHTML = '';
-                if(lastAdditionP25) {
-                    const date = new Date(lastAdditionP25.date);
-                    const formattedDate = date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-                    ui.lastAdditionP25.innerHTML = `
-                        <span>Última adição: <strong>+${lastAdditionP25.quantity}</strong> em ${formattedDate}</span>
-                        <button class="btn-undo" onclick="undoLastStockAddition('p25')">Desfazer</button>
-                    `;
-                }
-                
-                ui.lastAdditionP35.innerHTML = '';
-                 if(lastAdditionP35) {
-                    const date = new Date(lastAdditionP35.date);
-                    const formattedDate = date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-                    ui.lastAdditionP35.innerHTML = `
-                       <span>Última adição: <strong>+${lastAdditionP35.quantity}</strong> em ${formattedDate}</span>
-                       <button class="btn-undo" onclick="undoLastStockAddition('p35')">Desfazer</button>
-                    `;
-                }
             }
             
             function populateMonthFilter() {
@@ -823,62 +823,37 @@
 
                 const saleToDelete = data.salesHistory[saleIndex];
                 
-                // Restore stock
                 data.stock[saleToDelete.productId] += saleToDelete.quantity;
-
-                // Remove sale from history
                 data.salesHistory.splice(saleIndex, 1);
 
                 saveData();
-                populateMonthFilter(); // Update the filter in case the last sale of a month was deleted
+                populateMonthFilter();
                 updateUI();
 
                 showMessage('Venda excluída e estoque restaurado.', 'success');
             }
             
-            function updateProfilePhoto() {
-                if (data.profile.photo) {
-                    ui.profileImage.src = data.profile.photo;
-                    ui.profileImage.classList.remove('hidden');
-                    ui.profileIcon.classList.add('hidden');
-                } else {
-                    ui.profileImage.classList.add('hidden');
-                    ui.profileIcon.classList.remove('hidden');
-                }
-            }
-
             // --- Profile Editing Logic ---
             function setupProfileEditing() {
                 ui.userName.addEventListener('click', () => {
-                    const currentName = ui.userName.textContent;
                     const input = document.createElement('input');
                     input.type = 'text';
                     input.className = 'user-name-input';
-                    input.value = currentName;
+                    input.value = ui.userName.textContent;
 
-                    const saveName = () => {
+                    input.addEventListener('blur', () => {
                         const newName = input.value.trim();
                         if (newName && newName !== data.profile.name) {
                             data.profile.name = newName;
                             saveData();
                         }
-                        ui.userName.textContent = data.profile.name;
+                        updateProfileUI();
                         ui.userNameWrapper.replaceChild(ui.userName, input);
-                    };
-
-                    input.addEventListener('blur', saveName);
-                    input.addEventListener('keydown', (e) => {
-                        if (e.key === 'Enter') {
-                            input.blur();
-                        } else if (e.key === 'Escape') {
-                            input.value = data.profile.name;
-                            input.blur();
-                        }
                     });
 
+                    input.addEventListener('keydown', e => e.key === 'Enter' && input.blur());
                     ui.userNameWrapper.replaceChild(input, ui.userName);
                     input.focus();
-                    input.select();
                 });
             }
             
@@ -891,7 +866,7 @@
                     reader.onload = () => {
                         data.profile.photo = reader.result;
                         saveData();
-                        updateProfilePhoto();
+                        updateProfileUI();
                         showMessage('Foto de perfil atualizada!', 'success');
                     };
                     reader.readAsDataURL(file);
@@ -899,7 +874,7 @@
             }
 
 
-            // --- New Sale Modal Logic ---
+            // --- Sale Modal Logic ---
             function openSaleModal() {
                 ui.saleStep1.classList.remove('hidden');
                 ui.saleStep2.classList.add('hidden');
@@ -909,17 +884,29 @@
             function closeSaleModal() {
                 ui.saleModal.classList.remove('show');
                 ui.saleQuantityForm.reset();
-                selectedProductForSale = null;
             }
+            
+            // --- Edit Stock Modal Logic ---
+            function openEditStockModal(productId) {
+                selectedProductForStockEdit = productId;
+                const productName = products[productId].name.split(' ')[0]; // Get "Rasteirinha"
+                ui.editStockProductTitle.textContent = `Editar Estoque: ${productName}`;
+                ui.editStockQuantityInput.value = data.stock[productId];
+                ui.editStockModal.classList.add('show');
+                ui.editStockQuantityInput.focus();
+            }
+            
+            function closeEditStockModal() {
+                ui.editStockModal.classList.remove('show');
+                ui.editStockForm.reset();
+                selectedProductForStockEdit = null;
+            }
+
 
             // --- Event Handlers ---
             ui.newSaleBtn.addEventListener('click', openSaleModal);
             ui.closeModalBtn.addEventListener('click', closeSaleModal);
-            ui.saleModal.addEventListener('click', (e) => {
-                if (e.target === ui.saleModal) {
-                    closeSaleModal();
-                }
-            });
+            ui.saleModal.addEventListener('click', e => e.target === ui.saleModal && closeSaleModal());
 
             ui.salesHistoryList.addEventListener('click', (e) => {
                 const deleteButton = e.target.closest('.delete-sale-btn');
@@ -943,86 +930,55 @@
                 ui.saleStep2.classList.add('hidden');
                 ui.saleStep1.classList.remove('hidden');
                 ui.saleQuantityForm.reset();
-                selectedProductForSale = null;
             });
-
-
 
             ui.saleQuantityForm.addEventListener('submit', (e) => {
                 e.preventDefault();
-                
-                const productId = selectedProductForSale;
                 const quantity = parseInt(ui.modalSaleQuantityInput.value, 10);
                 
-                if (!productId) { return; } // Should not happen
                 if (isNaN(quantity) || quantity <= 0) { showMessage('Por favor, insira uma quantidade válida.', 'error'); return; }
-                if (quantity > data.stock[productId]) { showMessage('Venda não realizada. Estoque insuficiente!', 'error'); return; }
+                if (quantity > data.stock[selectedProductForSale]) { showMessage('Venda não realizada. Estoque insuficiente!', 'error'); return; }
                 
-                const product = products[productId];
-                data.stock[productId] -= quantity;
-
-                const saleRecord = { productId, quantity, price: product.price, date: new Date().toISOString() };
-                data.salesHistory.push(saleRecord);
+                const product = products[selectedProductForSale];
+                data.stock[selectedProductForSale] -= quantity;
+                data.salesHistory.push({ productId: selectedProductForSale, quantity, price: product.price, date: new Date().toISOString() });
                 
                 populateMonthFilter();
                 saveData();
                 updateUI();
-                
-                showMessage(`Venda de ${quantity} ${product.name}(s) registrada!`, 'success');
+                showMessage(`Venda registrada!`, 'success');
                 closeSaleModal();
             });
             
             ui.monthFilter.addEventListener('change', updateUI);
+            
+            // Edit Stock Events
+            ui.editableStockCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const productId = card.dataset.productId;
+                    openEditStockModal(productId);
+                });
+            });
+            
+            ui.closeEditStockModalBtn.addEventListener('click', closeEditStockModal);
+            ui.editStockModal.addEventListener('click', e => e.target === ui.editStockModal && closeEditStockModal());
 
-            window.addStock = (productId) => {
-                const inputElement = (productId === 'p25') ? ui.addStock25Input : ui.addStock35Input;
-                const quantity = parseInt(inputElement.value, 10);
+            ui.editStockForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const newQuantity = parseInt(ui.editStockQuantityInput.value, 10);
 
-                if (isNaN(quantity) || quantity <= 0) {
-                    showMessage('Por favor, insira uma quantidade válida para adicionar.', 'error');
+                if (isNaN(newQuantity) || newQuantity < 0) {
+                    showMessage('Por favor, insira uma quantidade válida.', 'error');
                     return;
                 }
-                data.stock[productId] += quantity;
-                
-                data.stockHistory.push({
-                    productId: productId,
-                    quantity: quantity,
-                    date: new Date().toISOString()
-                });
-                
+
+                data.stock[selectedProductForStockEdit] = newQuantity;
                 saveData();
                 updateUI();
-                showMessage(`${quantity} unidade(s) adicionada(s) ao estoque.`, 'success');
-                inputElement.value = '';
-            }
-            
-            window.undoLastStockAddition = (productId) => {
-                const stockAdditionsForProduct = data.stockHistory.filter(item => item.productId === productId);
-                if (stockAdditionsForProduct.length === 0) {
-                    showMessage('Nenhuma adição para desfazer.', 'error');
-                    return;
-                }
+                showMessage('Estoque atualizado com sucesso!', 'success');
+                closeEditStockModal();
+            });
 
-                const lastAddition = stockAdditionsForProduct[stockAdditionsForProduct.length - 1];
-                
-                if (data.stock[productId] < lastAddition.quantity) {
-                     showMessage('Não é possível desfazer. Itens desta adição já foram vendidos.', 'error');
-                     return;
-                }
-                
-                // Find the index of the absolute last item in the main history array to remove it
-                const itemIndex = data.stockHistory.findLastIndex(item => 
-                    item.date === lastAddition.date && item.productId === lastAddition.productId
-                );
-
-                if (itemIndex > -1) {
-                    data.stock[productId] -= lastAddition.quantity;
-                    data.stockHistory.splice(itemIndex, 1);
-                    saveData();
-                    updateUI();
-                    showMessage('Última adição desfeita com sucesso!', 'success');
-                }
-            }
 
             // --- Initialization ---
             loadData();
@@ -1032,5 +988,4 @@
     </script>
 </body>
 </html>
-
 

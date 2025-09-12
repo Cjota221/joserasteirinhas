@@ -74,6 +74,15 @@
             align-items: center;
             color: var(--dark-blue);
             flex-shrink: 0;
+            cursor: pointer;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .photo-circle img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .user-name {
@@ -232,11 +241,40 @@
             padding: 0.8rem 1rem;
             font-size: 1rem;
             background-color: var(--success); /* Alterado para verde para melhor visibilidade */
+            color: var(--white); /* Adicionado para garantir o texto branco */
             font-weight: 700; /* Texto em negrito */
         }
         
         .stock-actions .btn:hover {
              background-color: #2E7D32; /* Verde mais escuro ao passar o mouse */
+        }
+        
+        .last-addition {
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--light-gray);
+            font-size: 0.9rem;
+            color: var(--medium-gray);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-undo {
+            background-color: transparent;
+            border: 1px solid var(--medium-gray);
+            color: var(--medium-gray);
+            padding: 0.25rem 0.6rem;
+            font-size: 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-undo:hover {
+            background-color: var(--danger);
+            color: var(--white);
+            border-color: var(--danger);
         }
 
         /* History List */
@@ -426,11 +464,13 @@
     <div class="container">
         <!-- Profile Section -->
         <section class="profile-section">
-            <div class="photo-circle" title="Foto de Perfil">
-                <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="currentColor" viewBox="0 0 16 16">
+            <label for="photo-upload" class="photo-circle" title="Clique para alterar a foto">
+                <img id="profile-image" class="hidden" alt="Foto de Perfil">
+                <svg id="profile-icon" xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="currentColor" viewBox="0 0 16 16">
                     <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
                 </svg>
-            </div>
+            </label>
+            <input type="file" id="photo-upload" class="hidden" accept="image/*">
             <div id="user-name-wrapper">
                  <h2 id="user-name" class="user-name" title="Clique para editar">Seu Nome Aqui</h2>
             </div>
@@ -486,6 +526,7 @@
                             <input type="number" id="add-stock-25" class="input" placeholder="Qtd." min="1">
                             <button class="btn" onclick="addStock('p25')">Adicionar</button>
                         </div>
+                        <div class="last-addition" id="last-addition-p25"></div>
                     </div>
                     <div class="card">
                         <h3>Rasteirinha (R$ 35,00)</h3>
@@ -494,6 +535,7 @@
                             <input type="number" id="add-stock-35" class="input" placeholder="Qtd." min="1">
                             <button class="btn" onclick="addStock('p35')">Adicionar</button>
                         </div>
+                        <div class="last-addition" id="last-addition-p35"></div>
                     </div>
                 </div>
             </section>
@@ -564,14 +606,18 @@
 
             // --- State Management ---
             let data = {
-                profile: { name: 'Seu Nome Aqui' },
+                profile: { name: 'Seu Nome Aqui', photo: null },
                 stock: { p25: 0, p35: 0 },
-                salesHistory: []
+                salesHistory: [],
+                stockHistory: []
             };
             let selectedProductForSale = null;
 
             // --- DOM Elements ---
             const ui = {
+                photoUpload: document.getElementById('photo-upload'),
+                profileImage: document.getElementById('profile-image'),
+                profileIcon: document.getElementById('profile-icon'),
                 userNameWrapper: document.getElementById('user-name-wrapper'),
                 userName: document.getElementById('user-name'),
                 totalPairsSold: document.getElementById('total-pairs-sold'),
@@ -589,6 +635,8 @@
                 noSalesMessage: document.getElementById('no-sales-message'),
                 dailyRevenue: document.getElementById('daily-revenue'),
                 dailyRevenueTitle: document.getElementById('daily-revenue-title'),
+                lastAdditionP25: document.getElementById('last-addition-p25'),
+                lastAdditionP35: document.getElementById('last-addition-p35'),
                 
                 // New Sale Flow UI
                 newSaleBtn: document.getElementById('new-sale-btn'),
@@ -610,9 +658,12 @@
                 if (savedData) {
                     data = JSON.parse(savedData);
                     if (!data.salesHistory) data.salesHistory = [];
-                    if (!data.profile) data.profile = { name: 'Seu Nome Aqui' };
+                    if (!data.stockHistory) data.stockHistory = [];
+                    if (!data.profile) data.profile = { name: 'Seu Nome Aqui', photo: null };
+                    if (data.profile.photo === undefined) data.profile.photo = null;
                 }
                 ui.userName.textContent = data.profile.name;
+                updateProfilePhoto();
                 populateMonthFilter();
                 updateUI();
             }
@@ -670,6 +721,32 @@
                 ui.totalStockValue.textContent = `R$ ${totalStockValue.toFixed(2).replace('.', ',')}`;
                 
                 renderSalesHistory(filteredSales);
+                renderLastAdditions();
+            }
+            
+            function renderLastAdditions() {
+                const lastAdditionP25 = [...data.stockHistory].filter(item => item.productId === 'p25').pop();
+                const lastAdditionP35 = [...data.stockHistory].filter(item => item.productId === 'p35').pop();
+                
+                ui.lastAdditionP25.innerHTML = '';
+                if(lastAdditionP25) {
+                    const date = new Date(lastAdditionP25.date);
+                    const formattedDate = date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+                    ui.lastAdditionP25.innerHTML = `
+                        <span>Última adição: <strong>+${lastAdditionP25.quantity}</strong> em ${formattedDate}</span>
+                        <button class="btn-undo" onclick="undoLastStockAddition('p25')">Desfazer</button>
+                    `;
+                }
+                
+                ui.lastAdditionP35.innerHTML = '';
+                 if(lastAdditionP35) {
+                    const date = new Date(lastAdditionP35.date);
+                    const formattedDate = date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+                    ui.lastAdditionP35.innerHTML = `
+                       <span>Última adição: <strong>+${lastAdditionP35.quantity}</strong> em ${formattedDate}</span>
+                       <button class="btn-undo" onclick="undoLastStockAddition('p35')">Desfazer</button>
+                    `;
+                }
             }
             
             function populateMonthFilter() {
@@ -758,6 +835,17 @@
 
                 showMessage('Venda excluída e estoque restaurado.', 'success');
             }
+            
+            function updateProfilePhoto() {
+                if (data.profile.photo) {
+                    ui.profileImage.src = data.profile.photo;
+                    ui.profileImage.classList.remove('hidden');
+                    ui.profileIcon.classList.add('hidden');
+                } else {
+                    ui.profileImage.classList.add('hidden');
+                    ui.profileIcon.classList.remove('hidden');
+                }
+            }
 
             // --- Profile Editing Logic ---
             function setupProfileEditing() {
@@ -791,6 +879,22 @@
                     ui.userNameWrapper.replaceChild(input, ui.userName);
                     input.focus();
                     input.select();
+                });
+            }
+            
+            function setupPhotoUpload() {
+                ui.photoUpload.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        data.profile.photo = reader.result;
+                        saveData();
+                        updateProfilePhoto();
+                        showMessage('Foto de perfil atualizada!', 'success');
+                    };
+                    reader.readAsDataURL(file);
                 });
             }
 
@@ -842,6 +946,8 @@
                 selectedProductForSale = null;
             });
 
+
+
             ui.saleQuantityForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 
@@ -877,17 +983,54 @@
                     return;
                 }
                 data.stock[productId] += quantity;
+                
+                data.stockHistory.push({
+                    productId: productId,
+                    quantity: quantity,
+                    date: new Date().toISOString()
+                });
+                
                 saveData();
                 updateUI();
                 showMessage(`${quantity} unidade(s) adicionada(s) ao estoque.`, 'success');
                 inputElement.value = '';
             }
+            
+            window.undoLastStockAddition = (productId) => {
+                const stockAdditionsForProduct = data.stockHistory.filter(item => item.productId === productId);
+                if (stockAdditionsForProduct.length === 0) {
+                    showMessage('Nenhuma adição para desfazer.', 'error');
+                    return;
+                }
+
+                const lastAddition = stockAdditionsForProduct[stockAdditionsForProduct.length - 1];
+                
+                if (data.stock[productId] < lastAddition.quantity) {
+                     showMessage('Não é possível desfazer. Itens desta adição já foram vendidos.', 'error');
+                     return;
+                }
+                
+                // Find the index of the absolute last item in the main history array to remove it
+                const itemIndex = data.stockHistory.findLastIndex(item => 
+                    item.date === lastAddition.date && item.productId === lastAddition.productId
+                );
+
+                if (itemIndex > -1) {
+                    data.stock[productId] -= lastAddition.quantity;
+                    data.stockHistory.splice(itemIndex, 1);
+                    saveData();
+                    updateUI();
+                    showMessage('Última adição desfeita com sucesso!', 'success');
+                }
+            }
 
             // --- Initialization ---
             loadData();
             setupProfileEditing();
+            setupPhotoUpload();
         });
     </script>
 </body>
 </html>
+
 

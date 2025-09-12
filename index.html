@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Vendas e Estoque</title>
+    <style>
+        /* CSS Reset and Basic Styles */
+        :root {
+            --dark-blue: #1A237E;
+            --medium-blue: #303F9F;
+            --light-blue: #C5CAE9;
+            --dark-gray: #212121;
+            --medium-gray: #757575;
+            --light-gray: #F5F5F5;
+            --white: #FFFFFF;
+            --danger: #D32F2F;
+            --success: #388E3C;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: var(--light-gray);
+            color: var(--dark-gray);
+            line-height: 1.6;
+        }
+
+        /* Container and Header */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 1.5rem 1rem;
+        }
+
+        header {
+            background-color: var(--dark-blue);
+            color: var(--white);
+            padding: 1.5rem;
+            text-align: center;
+            border-radius: 0 0 12px 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+        }
+
+        /* Section Title */
+        h2 {
+            font-size: 1.5rem;
+            color: var(--dark-blue);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--light-blue);
+        }
+
+        /* Grid Layout */
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .stock-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+         @media (min-width: 900px) {
+            .dashboard-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        /* Card Style */
+        .card {
+            background-color: var(--white);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h3 {
+            font-size: 1.1rem;
+            color: var(--medium-gray);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .card .value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--dark-blue);
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--medium-blue);
+        }
+
+        .input, .select {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid #BDBDBD;
+            border-radius: 8px;
+            font-size: 1rem;
+            background-color: #FAFAFA;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .input:focus, .select:focus {
+            outline: none;
+            border-color: var(--dark-blue);
+            box-shadow: 0 0 0 3px var(--light-blue);
+        }
+
+        /* Button Style */
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.2s;
+            text-align: center;
+        }
+        
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background-color: var(--dark-blue);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--medium-blue);
+        }
+        
+        .btn-secondary {
+            background-color: var(--medium-blue);
+            color: var(--white);
+        }
+        
+        .btn-secondary:hover {
+            background-color: #5C6BC0; /* A lighter shade of medium-blue */
+        }
+        
+        /* Stock Management specific styles */
+        .stock-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            margin-top: 1rem;
+        }
+        
+        .stock-actions .input {
+            flex-grow: 1;
+        }
+
+        .stock-actions .btn {
+            width: auto;
+            padding: 0.8rem 1rem;
+            font-size: 1rem;
+        }
+
+        /* Initial Setup Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 1rem;
+        }
+
+        .modal-content {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Message/Alert Box */
+        #message-box {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            color: var(--white);
+            font-weight: 600;
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s, transform 0.3s;
+        }
+
+        #message-box.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -10px);
+        }
+        
+        #message-box.success {
+            background-color: var(--success);
+        }
+
+        #message-box.error {
+            background-color: var(--danger);
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Modal for Initial Stock Setup -->
+    <div id="initial-stock-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2>Estoque Inicial</h2>
+            <p style="margin-bottom: 1.5rem; color: var(--medium-gray);">Defina a quantidade inicial de peças para cada produto.</p>
+            <form id="initial-stock-form">
+                <div class="form-group">
+                    <label for="initial-stock-25">Rasteirinha (R$ 25,00)</label>
+                    <input type="number" id="initial-stock-25" class="input" placeholder="Qtd." min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="initial-stock-35">Rasteirinha (R$ 35,00)</label>
+                    <input type="number" id="initial-stock-35" class="input" placeholder="Qtd." min="0" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Salvar Estoque</button>
+            </form>
+        </div>
+    </div>
+    
+    <header>
+        <h1>Sistema de Vendas e Estoque</h1>
+    </header>
+
+    <div class="container">
+        <main>
+            <!-- Dashboard Section -->
+            <section id="dashboard">
+                <h2>Dashboard</h2>
+                <div class="grid dashboard-grid">
+                    <div class="card">
+                        <h3>Total de Pares Vendidos</h3>
+                        <p class="value" id="total-pairs-sold">0</p>
+                    </div>
+                    <div class="card">
+                        <h3>Total Faturado</h3>
+                        <p class="value" id="total-revenue">R$ 0,00</p>
+                    </div>
+                    <div class="card">
+                        <h3>Pares de R$25 Vendidos</h3>
+                        <p class="value" id="p25-sold">0</p>
+                    </div>
+                    <div class="card">
+                        <h3>Pares de R$35 Vendidos</h3>
+                        <p class="value" id="p35-sold">0</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Stock Management Section -->
+            <section id="stock" style="margin-top: 2rem;">
+                <h2>Gerenciar Estoque</h2>
+                <div class="card" style="margin-bottom: 1.5rem;">
+                    <h3>Valor Total em Estoque</h3>
+                    <p class="value" id="total-stock-value">R$ 0,00</p>
+                </div>
+                <div class="grid stock-grid">
+                    <div class="card">
+                        <h3>Rasteirinha (R$ 25,00)</h3>
+                        <p class="value" id="stock-25">0</p>
+                        <div class="stock-actions">
+                            <input type="number" id="add-stock-25" class="input" placeholder="Qtd." min="1">
+                            <button class="btn btn-secondary" onclick="addStock('p25')">Adicionar</button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>Rasteirinha (R$ 35,00)</h3>
+                        <p class="value" id="stock-35">0</p>
+                         <div class="stock-actions">
+                            <input type="number" id="add-stock-35" class="input" placeholder="Qtd." min="1">
+                            <button class="btn btn-secondary" onclick="addStock('p35')">Adicionar</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Sales Registration Section -->
+            <section id="sales" style="margin-top: 2rem;">
+                <h2>Registrar Venda</h2>
+                <div class="card">
+                    <form id="sale-form">
+                        <div class="form-group">
+                            <label for="product-select">Produto</label>
+                            <select id="product-select" class="select" required>
+                                <option value="" disabled selected>Selecione um produto</option>
+                                <option value="p25">Rasteirinha (R$ 25,00)</option>
+                                <option value="p35">Rasteirinha (R$ 35,00)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="sale-quantity">Quantidade</label>
+                            <input type="number" id="sale-quantity" class="input" placeholder="Qtd." min="1" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Registrar Venda</button>
+                    </form>
+                </div>
+            </section>
+        </main>
+    </div>
+    
+    <!-- Custom Message/Alert Box -->
+    <div id="message-box"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Product Configuration ---
+            const products = {
+                p25: { name: 'Rasteirinha R$25', price: 25 },
+                p35: { name: 'Rasteirinha R$35', price: 35 }
+            };
+
+            // --- State Management ---
+            let data = {
+                stock: { p25: 0, p35: 0 },
+                sales: { totalPairs: 0, totalRevenue: 0, p25_sold: 0, p35_sold: 0 }
+            };
+
+            // --- DOM Elements ---
+            const ui = {
+                totalPairsSold: document.getElementById('total-pairs-sold'),
+                totalRevenue: document.getElementById('total-revenue'),
+                p25Sold: document.getElementById('p25-sold'),
+                p35Sold: document.getElementById('p35-sold'),
+                stock25: document.getElementById('stock-25'),
+                stock35: document.getElementById('stock-35'),
+                addStock25Input: document.getElementById('add-stock-25'),
+                addStock35Input: document.getElementById('add-stock-35'),
+                totalStockValue: document.getElementById('total-stock-value'),
+                saleForm: document.getElementById('sale-form'),
+                productSelect: document.getElementById('product-select'),
+                saleQuantityInput: document.getElementById('sale-quantity'),
+                initialStockModal: document.getElementById('initial-stock-modal'),
+                initialStockForm: document.getElementById('initial-stock-form'),
+                initialStock25Input: document.getElementById('initial-stock-25'),
+                initialStock35Input: document.getElementById('initial-stock-35'),
+                messageBox: document.getElementById('message-box')
+            };
+
+            // --- Core Functions ---
+
+            /**
+             * Loads data from localStorage or shows the initial setup modal.
+             */
+            function loadData() {
+                const savedData = localStorage.getItem('salesStockData');
+                if (savedData) {
+                    data = JSON.parse(savedData);
+                } else {
+                    ui.initialStockModal.classList.remove('hidden');
+                }
+                updateUI();
+            }
+
+            /**
+             * Saves the current state to localStorage.
+             */
+            function saveData() {
+                localStorage.setItem('salesStockData', JSON.stringify(data));
+            }
+
+            /**
+             * Updates all visible elements on the page with current data.
+             */
+            function updateUI() {
+                // Dashboard
+                ui.totalPairsSold.textContent = data.sales.totalPairs;
+                ui.totalRevenue.textContent = `R$ ${data.sales.totalRevenue.toFixed(2).replace('.', ',')}`;
+                ui.p25Sold.textContent = data.sales.p25_sold;
+                ui.p35Sold.textContent = data.sales.p35_sold;
+                // Stock
+                ui.stock25.textContent = data.stock.p25;
+                ui.stock35.textContent = data.stock.p35;
+
+                // Calcula e exibe o valor total do estoque
+                const totalStockValue = (data.stock.p25 * products.p25.price) + (data.stock.p35 * products.p35.price);
+                ui.totalStockValue.textContent = `R$ ${totalStockValue.toFixed(2).replace('.', ',')}`;
+            }
+
+            /**
+             * Shows a custom message at the bottom of the screen.
+             * @param {string} message The text to display.
+             * @param {string} type 'success' or 'error'.
+             */
+            function showMessage(message, type = 'success') {
+                ui.messageBox.textContent = message;
+                ui.messageBox.className = type; // Removes previous classes
+                ui.messageBox.classList.add('show');
+                
+                setTimeout(() => {
+                    ui.messageBox.classList.remove('show');
+                }, 3000);
+            }
+
+            // --- Event Handlers ---
+
+            /**
+             * Handles the initial stock form submission.
+             */
+            ui.initialStockForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const stock25 = parseInt(ui.initialStock25Input.value, 10);
+                const stock35 = parseInt(ui.initialStock35Input.value, 10);
+
+                if (isNaN(stock25) || stock25 < 0 || isNaN(stock35) || stock35 < 0) {
+                    showMessage('Por favor, insira valores válidos.', 'error');
+                    return;
+                }
+                
+                data.stock.p25 = stock25;
+                data.stock.p35 = stock35;
+                
+                saveData();
+                updateUI();
+                
+                ui.initialStockModal.classList.add('hidden');
+                showMessage('Estoque inicial salvo com sucesso!', 'success');
+            });
+
+
+            /**
+             * Handles the sale registration form submission.
+             */
+            ui.saleForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const productId = ui.productSelect.value;
+                const quantity = parseInt(ui.saleQuantityInput.value, 10);
+                
+                if (!productId) {
+                    showMessage('Por favor, selecione um produto.', 'error');
+                    return;
+                }
+                
+                if (isNaN(quantity) || quantity <= 0) {
+                    showMessage('Por favor, insira uma quantidade válida.', 'error');
+                    return;
+                }
+
+                if (quantity > data.stock[productId]) {
+                    showMessage('Venda não realizada. Estoque insuficiente!', 'error');
+                    return;
+                }
+                
+                // Update state
+                const product = products[productId];
+                data.stock[productId] -= quantity;
+                data.sales.totalPairs += quantity;
+                data.sales.totalRevenue += product.price * quantity;
+                data.sales[`${productId}_sold`] += quantity;
+                
+                saveData();
+                updateUI();
+                
+                showMessage(`Venda de ${quantity} ${product.name}(s) registrada!`, 'success');
+                ui.saleForm.reset();
+            });
+
+            // Make addStock function globally accessible for the inline onclick handler
+            window.addStock = (productId) => {
+                const inputElement = (productId === 'p25') ? ui.addStock25Input : ui.addStock35Input;
+                const quantity = parseInt(inputElement.value, 10);
+
+                if (isNaN(quantity) || quantity <= 0) {
+                    showMessage('Por favor, insira uma quantidade válida para adicionar.', 'error');
+                    return;
+                }
+
+                data.stock[productId] += quantity;
+                
+                saveData();
+                updateUI();
+                
+                showMessage(`${quantity} unidade(s) adicionada(s) ao estoque.`, 'success');
+                inputElement.value = '';
+            }
+
+            // --- Initialization ---
+            loadData();
+        });
+    </script>
+</body>
+</html>
+

@@ -763,13 +763,13 @@
         <main id="reports-view" class="view hidden">
             <!-- Dashboard Section -->
             <section id="dashboard" style="margin-top: 2rem;">
-                <h2>Relatório Geral</h2>
+                <h2 id="reports-title">Relatório Geral</h2>
                 <div class="grid dashboard-grid">
                     <div class="card">
                         <h3>Total de Pares Vendidos</h3>
                         <p class="value" id="total-pairs-sold">0</p>
                     </div>
-                    <div class="card">
+                    <div class="card card-green">
                         <h3>Total Faturado</h3>
                         <p class="value" id="total-revenue">R$ 0,00</p>
                     </div>
@@ -790,13 +790,17 @@
                 <div class="card">
                     <div class="filter-grid">
                         <div class="form-group">
-                            <label for="month-filter">Filtrar por Mês</label>
-                            <select id="month-filter" class="select"></select>
+                            <label for="start-date-filter">Filtrar Período (Início)</label>
+                            <input type="date" id="start-date-filter" class="select">
                         </div>
                         <div class="form-group">
-                            <label for="date-filter">Filtrar por Dia</label>
-                            <input type="date" id="date-filter" class="select">
+                            <label for="end-date-filter">Período (Fim)</label>
+                            <input type="date" id="end-date-filter" class="select">
                         </div>
+                    </div>
+                     <div class="form-group">
+                        <label for="month-filter">ou Selecione um Mês Completo</label>
+                        <select id="month-filter" class="select"></select>
                     </div>
                     <ul id="sales-history-list" class="history-list">
                        <!-- Sales items will be injected here by JS -->
@@ -923,6 +927,7 @@
                 dailyPairsSummary: document.getElementById('daily-pairs-summary'),
                 
                 // --- Report View Elements
+                reportsTitle: document.getElementById('reports-title'),
                 totalPairsSold: document.getElementById('total-pairs-sold'),
                 totalRevenue: document.getElementById('total-revenue'),
                 p25Sold: document.getElementById('p25-sold'),
@@ -943,7 +948,8 @@
                 // --- Filters & History
                 messageBox: document.getElementById('message-box'),
                 monthFilter: document.getElementById('month-filter'),
-                dateFilter: document.getElementById('date-filter'),
+                startDateFilter: document.getElementById('start-date-filter'),
+                endDateFilter: document.getElementById('end-date-filter'),
                 salesHistoryList: document.getElementById('sales-history-list'),
                 noSalesMessage: document.getElementById('no-sales-message'),
                 
@@ -1035,31 +1041,40 @@
              * Atualiza toda a interface (dashboard, estoque, etc.) com base nos filtros.
              */
             function updateUI() {
-                const selectedDate = ui.dateFilter.value;
+                const startDate = ui.startDateFilter.value;
+                const endDate = ui.endDateFilter.value;
                 const selectedMonth = ui.monthFilter.value;
                 let filteredSales = data.salesHistory;
 
                 // Aplica filtros de data ou mês
-                if (selectedDate) {
-                    const filterDate = new Date(selectedDate + 'T00:00:00');
-                    const filterDateKey = filterDate.toLocaleDateString('pt-BR');
-                    filteredSales = data.salesHistory.filter(sale => new Date(sale.date).toLocaleDateString('pt-BR') === filterDateKey);
+                if (startDate && endDate) {
+                    const start = new Date(startDate + 'T00:00:00');
+                    const end = new Date(endDate + 'T00:00:00');
+                    end.setDate(end.getDate() + 1); // Point to the start of the next day
+
+                    filteredSales = data.salesHistory.filter(sale => {
+                        const saleDate = new Date(sale.date);
+                        return saleDate >= start && saleDate < end;
+                    });
                     
-                    const [year, month] = selectedDate.split('-');
-                    const monthValue = `${year}-${month}`;
-                     if ([...ui.monthFilter.options].some(opt => opt.value === monthValue)) {
-                        ui.monthFilter.value = monthValue;
-                    } else {
-                        ui.monthFilter.value = 'all';
-                    }
+                    const formattedStart = start.toLocaleDateString('pt-BR');
+                    const formattedEnd = new Date(endDate + 'T00:00:00').toLocaleDateString('pt-BR');
+                    ui.reportsTitle.textContent = `Relatório de ${formattedStart} a ${formattedEnd}`;
+
                 } else if (selectedMonth !== 'all' && selectedMonth) {
                     filteredSales = data.salesHistory.filter(sale => {
                         const saleDate = new Date(sale.date);
                         const saleMonthYear = `${saleDate.getFullYear()}-${String(saleDate.getMonth() + 1).padStart(2, '0')}`;
                         return saleMonthYear === selectedMonth;
                     });
+                     const [year, monthNum] = selectedMonth.split('-');
+                    const monthName = new Date(year, monthNum - 1).toLocaleString('pt-BR', { month: 'long' });
+                    const formattedTitleMonth = `${monthName.charAt(0).toUpperCase() + monthName.slice(1)} de ${year}`;
+                    ui.reportsTitle.textContent = `Relatório de ${formattedTitleMonth}`;
+                } else {
+                    ui.reportsTitle.textContent = 'Relatório Geral';
                 }
-                
+
                 // Calcula estatísticas para o Relatório
                 const stats = filteredSales.reduce((acc, sale) => {
                     acc.totalPairs += sale.quantity;
@@ -1409,11 +1424,18 @@
             
             // Filters
             ui.monthFilter.addEventListener('change', () => {
-                ui.dateFilter.value = ''; // Clear date filter when month is selected
+                ui.startDateFilter.value = '';
+                ui.endDateFilter.value = '';
                 updateUI();
             });
             
-            ui.dateFilter.addEventListener('change', updateUI);
+            function handleDateFilterChange() {
+                ui.monthFilter.value = 'all';
+                updateUI();
+            }
+
+            ui.startDateFilter.addEventListener('change', handleDateFilterChange);
+            ui.endDateFilter.addEventListener('change', handleDateFilterChange);
             
             // Edit Stock Events
             document.querySelectorAll('.editable-stock .value').forEach(el => {

@@ -9,14 +9,16 @@
         :root {
             --dark-blue: #1A237E;
             --medium-blue: #303F9F;
-            --light-blue: #C5CAE9;
+            --light-blue: #E8EAF6;
             --dark-gray: #212121;
             --medium-gray: #757575;
             --light-gray: #F5F5F5;
             --white: #FFFFFF;
             --danger: #D32F2F;
+            --danger-light: #E57373;
             --success: #388E3C;
             --success-light: #4CAF50;
+            --warning: #FBC02D;
         }
 
         * {
@@ -30,13 +32,14 @@
             background-color: var(--light-gray);
             color: var(--dark-gray);
             line-height: 1.6;
+            font-size: 16px; /* Aumentado para melhor leitura */
         }
 
         /* Container and Header */
         .container {
             max-width: 900px;
             margin: 0 auto;
-            padding: 1.5rem 1rem;
+            padding: 1.5rem 1rem 8rem 1rem; /* Espaço para o menu fixo */
         }
 
         header {
@@ -51,6 +54,22 @@
         header h1 {
             font-size: 1.75rem;
             font-weight: 600;
+        }
+        
+        /* Ícones SVG */
+        .icon {
+            width: 24px;
+            height: 24px;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+        
+        .icon-light {
+            fill: white;
+        }
+        
+        .icon-dark {
+            fill: var(--dark-blue);
         }
 
         /* Profile Section */
@@ -138,7 +157,7 @@
 
         /* Section Title */
         h2 {
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             color: var(--dark-blue);
             margin-bottom: 1.5rem;
             padding-bottom: 0.5rem;
@@ -178,11 +197,6 @@
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
-        
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-        }
 
         .card h3 {
             font-size: 1.1rem;
@@ -192,7 +206,7 @@
         }
 
         .card .value {
-            font-size: 2.5rem;
+            font-size: 2.8rem;
             font-weight: 700;
             color: var(--dark-blue);
         }
@@ -205,10 +219,10 @@
 
         .editable-stock .value::after {
             content: '✏️';
-            font-size: 1rem;
+            font-size: 1.1rem;
             position: absolute;
             top: 5px;
-            right: -25px;
+            right: -28px;
             opacity: 0.6;
             transition: opacity 0.2s;
         }
@@ -234,10 +248,9 @@
             background: linear-gradient(45deg, var(--dark-blue), var(--medium-blue));
         }
 
-
         /* Form Elements */
         .form-group {
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
         }
 
         .form-group label {
@@ -249,10 +262,10 @@
 
         .input, .select {
             width: 100%;
-            padding: 0.8rem 1rem;
+            padding: 1rem;
             border: 1px solid #BDBDBD;
             border-radius: 8px;
-            font-size: 1rem;
+            font-size: 1.1rem;
             background-color: #FAFAFA;
             transition: border-color 0.2s, box-shadow 0.2s;
         }
@@ -262,15 +275,18 @@
             border-color: var(--dark-blue);
             box-shadow: 0 0 0 3px var(--light-blue);
         }
-
-        /* Button Style */
+        
+        /* Big Buttons */
         .btn {
-            display: block;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             width: 100%;
-            padding: 1rem;
+            padding: 0 1.5rem;
+            min-height: 60px; /* Altura mínima aumentada */
             border: none;
-            border-radius: 8px;
-            font-size: 1.1rem;
+            border-radius: 12px; /* Cantos mais arredondados */
+            font-size: 1.2rem;
             font-weight: 600;
             cursor: pointer;
             transition: background-color 0.2s, transform 0.2s;
@@ -291,12 +307,22 @@
         }
         
         .btn-secondary {
-            background-color: var(--medium-gray);
-            color: var(--white);
+            background-color: #f0f0f0;
+            color: var(--dark-gray);
+            border: 1px solid #ccc;
         }
         
         .btn-secondary:hover {
-            background-color: #9E9E9E;
+            background-color: #e0e0e0;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger);
+            color: var(--white);
+        }
+        
+        .btn-danger:hover {
+            background-color: var(--danger-light);
         }
 
         /* Stock Management specific styles */
@@ -304,15 +330,17 @@
             display: flex;
             gap: 0.5rem;
             align-items: center;
-            margin-top: 1rem;
+            margin-top: 1.5rem;
         }
         
         .stock-actions .input {
             flex-grow: 1;
+            min-height: 50px;
         }
 
         .stock-actions .btn {
             width: auto;
+            min-height: 50px;
             padding: 0.8rem 1rem;
             font-size: 1rem;
             background-color: var(--success);
@@ -328,35 +356,53 @@
             margin-top: 1.5rem;
             padding-top: 1rem;
             border-top: 1px solid var(--light-gray);
-            font-size: 0.9rem;
+            font-size: 1rem; /* Aumentado */
             color: var(--medium-gray);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .btn-undo {
-            background-color: transparent;
-            border: 1px solid var(--medium-gray);
-            color: var(--medium-gray);
-            padding: 0.25rem 0.6rem;
-            font-size: 0.8rem;
-            border-radius: 6px;
+            background-color: #FFF8E1;
+            border: 1px solid var(--warning);
+            color: #E65100;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            border-radius: 8px;
             cursor: pointer;
             transition: all 0.2s;
+            font-weight: 600;
         }
 
         .btn-undo:hover {
-            background-color: var(--danger);
+            background-color: var(--warning);
             color: var(--white);
-            border-color: var(--danger);
+        }
+
+        .low-stock-warning {
+            border: 3px solid var(--warning);
         }
         
+        .low-stock-warning::before {
+            content: '⚠️ Estoque Baixo';
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #E65100;
+            background-color: var(--warning);
+            padding: 4px 8px;
+            border-radius: 6px;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
         /* History List */
         .history-list {
             list-style: none;
             margin-top: 1.5rem;
-            max-height: 400px;
+            max-height: 500px;
             overflow-y: auto;
             border: 1px solid #E0E0E0;
             border-radius: 8px;
@@ -374,12 +420,8 @@
             border-bottom: none;
         }
         
-        .history-list li:nth-child(odd) {
-            background-color: #F9F9F9;
-        }
-
         .history-item-details {
-            font-size: 0.9rem;
+            font-size: 1rem;
         }
 
         .history-item-details strong {
@@ -387,8 +429,8 @@
         }
 
         .history-item-value {
-            font-weight: 600;
-            font-size: 1rem;
+            font-weight: 700;
+            font-size: 1.1rem;
         }
 
         .history-item-actions {
@@ -402,15 +444,54 @@
             border: none;
             color: var(--danger);
             cursor: pointer;
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             line-height: 1;
-            padding: 0.25rem;
+            padding: 0.5rem;
             border-radius: 50%;
             transition: background-color 0.2s;
         }
 
         .delete-sale-btn:hover {
             background-color: #FFCDD2; /* Light red */
+        }
+        
+        /* Navigation Menu */
+        .main-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            background-color: var(--white);
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
+            z-index: 999;
+        }
+        
+        .nav-btn {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 0.5rem;
+            border: none;
+            background-color: transparent;
+            color: var(--medium-gray);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: color 0.2s;
+            border-top: 4px solid transparent;
+        }
+        
+        .nav-btn.active {
+            color: var(--dark-blue);
+            font-weight: 600;
+            border-top: 4px solid var(--dark-blue);
+        }
+        
+        .nav-btn .icon {
+            margin-bottom: 4px;
+            fill: currentColor;
         }
 
         /* Modals */
@@ -456,6 +537,29 @@
             color: var(--medium-gray);
             cursor: pointer;
         }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header .icon {
+            width: 48px;
+            height: 48px;
+            fill: var(--warning);
+        }
+
+        .modal-header h2 {
+            margin-bottom: 0.5rem;
+            border: none;
+        }
+        
+        .modal-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
         
         .product-selection-grid {
             display: grid;
@@ -492,6 +596,28 @@
             color: var(--dark-blue);
             margin-top: 0.5rem;
         }
+        
+        .stock-display-modal {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--medium-blue);
+            margin-top: 0.75rem;
+        }
+
+        .change-calculator {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #eee;
+        }
+        
+        #change-display {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--success);
+            text-align: center;
+            margin-top: 1rem;
+            min-height: 25px;
+        }
 
 
         .hidden {
@@ -501,7 +627,7 @@
         /* Message/Alert Box */
         #message-box {
             position: fixed;
-            bottom: 20px;
+            bottom: 80px; /* Acima do menu */
             left: 50%;
             transform: translateX(-50%);
             padding: 1rem 1.5rem;
@@ -511,7 +637,7 @@
             z-index: 1001;
             opacity: 0;
             visibility: hidden;
-            transition: opacity 0.3s, visibility 0.3s, transform 0.3s;
+            transition: opacity 0.3s, visibility 0.3, transform 0.3s;
         }
 
         #message-box.show {
@@ -532,8 +658,24 @@
 </head>
 <body>
     
+    <!-- Ícones SVG para uso no app -->
+    <svg width="0" height="0" class="hidden">
+      <symbol xmlns="http://www.w3.org/2000/svg" id="icon-sell" viewBox="0 0 16 16">
+        <path d="M0 2.5A.5.5 0 0 1 .5 2H2a.5.5 0 0 1 .485.379L2.89 4H14.5a.5.5 0 0 1 .485.621l-1.5 6A.5.5 0 0 1 13 11H4a.5.5 0 0 1-.485-.379L1.61 3H.5a.5.5 0 0 1-.5-.5zM3.14 5l1.25 5h8.22l1.25-5H3.14zM5 13a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm-2 1a2 2 0 1 1 4 0 2 2 0 0 1-4 0zm9-1a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm-2 1a2 2 0 1 1 4 0 2 2 0 0 1-4 0z"/>
+      </symbol>
+      <symbol xmlns="http://www.w3.org/2000/svg" id="icon-stock" viewBox="0 0 16 16">
+        <path d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5 8 5.961 14.154 3.5 8.186 1.113zM15 4.239l-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923l6.5 2.6zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.63 13.09a1 1 0 0 1-.63-.928V3.5a.5.5 0 0 1 .314-.464L7.443.184z"/>
+      </symbol>
+      <symbol xmlns="http://www.w3.org/2000/svg" id="icon-reports" viewBox="0 0 16 16">
+        <path d="M4 11H2v3h2v-3zm5-4H7v7h2V7zm5-5h-2v12h2V2z"/>
+      </symbol>
+      <symbol xmlns="http://www.w3.org/2000/svg" id="icon-warning" viewBox="0 0 16 16">
+        <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+      </symbol>
+    </svg>
+    
     <header>
-        <h1>Sistema de Vendas e Estoque</h1>
+        <h1>Controle de Vendas</h1>
     </header>
 
     <div class="container">
@@ -556,42 +698,33 @@
             </div>
         </section>
 
-        <main>
+        <main id="sell-view" class="view">
              <!-- Actions Section -->
             <section id="actions" style="margin-top: 2rem;">
-                 <button class="btn btn-primary" id="new-sale-btn" style="padding: 1.25rem; font-size: 1.25rem;">
-                    &#43; Nova Venda
+                 <button class="btn btn-primary" id="new-sale-btn">
+                    <svg class="icon icon-light"><use href="#icon-sell"></use></svg>
+                    Registrar Nova Venda
                 </button>
             </section>
-
-            <!-- Dashboard Section -->
-            <section id="dashboard" style="margin-top: 2rem;">
-                <h2>Dashboard</h2>
+            
+            <!-- Daily Summary Card -->
+            <section style="margin-top: 2rem;">
+                <h2>Resumo de Hoje</h2>
                 <div class="grid dashboard-grid">
-                    <div class="card">
-                        <h3>Total de Pares Vendidos</h3>
-                        <p class="value" id="total-pairs-sold">0</p>
+                    <div class="card card-green">
+                        <h3>💰 Faturamento de Hoje</h3>
+                        <p class="value" id="daily-revenue-summary">R$ 0,00</p>
                     </div>
                     <div class="card">
-                        <h3>Total Faturado</h3>
-                        <p class="value" id="total-revenue">R$ 0,00</p>
-                    </div>
-                     <div class="card card-green">
-                        <h3 id="daily-revenue-title">Vendas de Hoje</h3>
-                        <p class="value" id="daily-revenue">R$ 0,00</p>
-                    </div>
-                    <div class="card">
-                        <h3>Pares de R$25 Vendidos</h3>
-                        <p class="value" id="p25-sold">0</p>
-                    </div>
-                    <div class="card">
-                        <h3>Pares de R$35 Vendidos</h3>
-                        <p class="value" id="p35-sold">0</p>
+                        <h3>📦 Pares Vendidos Hoje</h3>
+                        <p class="value" id="daily-pairs-summary">0</p>
                     </div>
                 </div>
             </section>
-
-            <!-- Stock Management Section -->
+        </main>
+        
+        <main id="stock-view" class="view hidden">
+             <!-- Stock Management Section -->
             <section id="stock" style="margin-top: 2rem;">
                 <h2>Gerenciar Estoque</h2>
                 <div class="grid stock-summary-grid" style="margin-bottom: 1.5rem;">
@@ -605,7 +738,7 @@
                     </div>
                 </div>
                 <div class="grid stock-grid">
-                    <div class="card editable-stock">
+                    <div class="card editable-stock" id="stock-card-p25">
                         <h3>Rasteirinha (R$ 25,00)</h3>
                         <p class="value" id="stock-25" title="Clique para editar o estoque" data-product-id="p25">0</p>
                         <div class="stock-actions">
@@ -614,7 +747,7 @@
                         </div>
                         <div class="last-addition" id="last-addition-p25"></div>
                     </div>
-                    <div class="card editable-stock">
+                    <div class="card editable-stock" id="stock-card-p35">
                         <h3>Rasteirinha (R$ 35,00)</h3>
                         <p class="value" id="stock-35" title="Clique para editar o estoque" data-product-id="p35">0</p>
                         <div class="stock-actions">
@@ -625,7 +758,32 @@
                     </div>
                 </div>
             </section>
-
+        </main>
+        
+        <main id="reports-view" class="view hidden">
+            <!-- Dashboard Section -->
+            <section id="dashboard" style="margin-top: 2rem;">
+                <h2>Relatório Geral</h2>
+                <div class="grid dashboard-grid">
+                    <div class="card">
+                        <h3>Total de Pares Vendidos</h3>
+                        <p class="value" id="total-pairs-sold">0</p>
+                    </div>
+                    <div class="card">
+                        <h3>Total Faturado</h3>
+                        <p class="value" id="total-revenue">R$ 0,00</p>
+                    </div>
+                    <div class="card">
+                        <h3>Pares de R$25 Vendidos</h3>
+                        <p class="value" id="p25-sold">0</p>
+                    </div>
+                    <div class="card">
+                        <h3>Pares de R$35 Vendidos</h3>
+                        <p class="value" id="p35-sold">0</p>
+                    </div>
+                </div>
+            </section>
+            
             <!-- Sales History Section -->
             <section id="history" style="margin-top: 2rem;">
                 <h2>Histórico de Vendas</h2>
@@ -636,7 +794,7 @@
                             <select id="month-filter" class="select"></select>
                         </div>
                         <div class="form-group">
-                            <label for="date-filter">Filtrar por Dia Específico</label>
+                            <label for="date-filter">Filtrar por Dia</label>
                             <input type="date" id="date-filter" class="select">
                         </div>
                     </div>
@@ -649,57 +807,85 @@
         </main>
     </div>
     
-    <!-- New Sale Modal -->
+    <!-- Navigation Menu -->
+    <nav class="main-nav">
+        <button class="nav-btn active" data-view="sell-view">
+            <svg class="icon"><use href="#icon-sell"></use></svg>
+            Vender
+        </button>
+        <button class="nav-btn" data-view="stock-view">
+            <svg class="icon"><use href="#icon-stock"></use></svg>
+            Estoque
+        </button>
+        <button class="nav-btn" data-view="reports-view">
+            <svg class="icon"><use href="#icon-reports"></use></svg>
+            Relatórios
+        </button>
+    </nav>
+    
+    <!-- Modals -->
     <div id="sale-modal" class="modal-overlay">
         <div class="modal-content">
             <button class="close-btn" id="close-modal-btn">&times;</button>
-            
-            <!-- Step 1: Product Selection -->
             <div id="sale-step-1">
-                <h2 style="margin-bottom: 0.5rem;">Nova Venda</h2>
-                <p style="margin-bottom: 1.5rem; color: var(--medium-gray);">Selecione o produto vendido:</p>
+                <h2 style="margin-bottom: 1.5rem;">Escolha o Produto</h2>
                 <div class="product-selection-grid">
                      <button class="btn-product" data-product="p25">
                         <strong>Rasteirinha</strong>
                         <span>R$ 25,00</span>
+                        <span class="stock-display-modal" id="stock-display-p25"></span>
                      </button>
                      <button class="btn-product" data-product="p35">
                         <strong>Rasteirinha</strong>
                         <span>R$ 35,00</span>
+                        <span class="stock-display-modal" id="stock-display-p35"></span>
                      </button>
                 </div>
             </div>
-
-            <!-- Step 2: Quantity Input -->
             <div id="sale-step-2" class="hidden">
                 <h2 id="sale-product-title"></h2>
                 <form id="sale-quantity-form">
                     <div class="form-group">
                         <label for="modal-sale-quantity">Quantidade Vendida</label>
-                        <input type="number" id="modal-sale-quantity" class="input" placeholder="Qtd." min="1" required>
+                        <input type="number" id="modal-sale-quantity" class="input" placeholder="Ex: 2" min="1" required>
                     </div>
-                    <button type="submit" class="btn btn-primary">Registrar Venda</button>
+                    <button type="submit" class="btn btn-primary">
+                        <svg class="icon icon-light"><use href="#icon-sell"></use></svg>
+                        Confirmar Venda
+                    </button>
                     <button type="button" id="back-to-products-btn" class="btn btn-secondary" style="margin-top: 0.5rem;">Voltar</button>
                 </form>
             </div>
         </div>
     </div>
     
-    <!-- Edit Stock Modal -->
     <div id="edit-stock-modal" class="modal-overlay">
         <div class="modal-content">
              <button class="close-btn" id="close-edit-stock-modal-btn">&times;</button>
              <h2 id="edit-stock-product-title"></h2>
              <form id="edit-stock-form">
                 <div class="form-group">
-                    <label for="edit-stock-quantity">Nova Quantidade em Estoque</label>
+                    <label for="edit-stock-quantity">Qual a quantidade correta em estoque?</label>
                     <input type="number" id="edit-stock-quantity" class="input" placeholder="Qtd." min="0" required>
                 </div>
                 <button type="submit" class="btn btn-primary">Salvar Estoque</button>
              </form>
         </div>
     </div>
-
+    
+    <div id="confirm-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <svg class="icon"><use href="#icon-warning"></use></svg>
+                <h2 id="confirm-title">Tem certeza?</h2>
+            </div>
+            <p id="confirm-message" style="text-align: center; font-size: 1.1rem;"></p>
+            <div class="modal-actions">
+                <button id="confirm-cancel-btn" class="btn btn-secondary">Cancelar</button>
+                <button id="confirm-ok-btn" class="btn btn-danger">Sim, continuar</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Custom Message/Alert Box -->
     <div id="message-box"></div>
@@ -733,53 +919,77 @@
                 userNameWrapper: document.getElementById('user-name-wrapper'),
                 userName: document.getElementById('user-name'),
                 currentDate: document.getElementById('current-date'),
+                dailyRevenueSummary: document.getElementById('daily-revenue-summary'),
+                dailyPairsSummary: document.getElementById('daily-pairs-summary'),
+                
+                // --- Report View Elements
                 totalPairsSold: document.getElementById('total-pairs-sold'),
                 totalRevenue: document.getElementById('total-revenue'),
                 p25Sold: document.getElementById('p25-sold'),
                 p35Sold: document.getElementById('p35-sold'),
+                
+                // --- Stock View Elements
                 stock25: document.getElementById('stock-25'),
                 stock35: document.getElementById('stock-35'),
+                stockCardP25: document.getElementById('stock-card-p25'),
+                stockCardP35: document.getElementById('stock-card-p35'),
                 addStock25Input: document.getElementById('add-stock-25'),
                 addStock35Input: document.getElementById('add-stock-35'),
                 lastAdditionP25: document.getElementById('last-addition-p25'),
                 lastAdditionP35: document.getElementById('last-addition-p35'),
                 totalStockValue: document.getElementById('total-stock-value'),
                 totalStockQuantity: document.getElementById('total-stock-quantity'),
+                
+                // --- Filters & History
                 messageBox: document.getElementById('message-box'),
                 monthFilter: document.getElementById('month-filter'),
                 dateFilter: document.getElementById('date-filter'),
                 salesHistoryList: document.getElementById('sales-history-list'),
                 noSalesMessage: document.getElementById('no-sales-message'),
-                dailyRevenue: document.getElementById('daily-revenue'),
-                dailyRevenueTitle: document.getElementById('daily-revenue-title'),
                 
-                // Sale Modal UI
+                // --- Navigation
+                navButtons: document.querySelectorAll('.nav-btn'),
+                views: document.querySelectorAll('.view'),
+                
+                // --- Sale Modal
                 newSaleBtn: document.getElementById('new-sale-btn'),
                 saleModal: document.getElementById('sale-modal'),
                 closeModalBtn: document.getElementById('close-modal-btn'),
                 saleStep1: document.getElementById('sale-step-1'),
                 saleStep2: document.getElementById('sale-step-2'),
                 productSelectionButtons: document.querySelectorAll('.btn-product'),
+                stockDisplayP25: document.getElementById('stock-display-p25'),
+                stockDisplayP35: document.getElementById('stock-display-p35'),
                 saleProductTitle: document.getElementById('sale-product-title'),
                 saleQuantityForm: document.getElementById('sale-quantity-form'),
                 modalSaleQuantityInput: document.getElementById('modal-sale-quantity'),
                 backToProductsBtn: document.getElementById('back-to-products-btn'),
                 
-                // Edit Stock Modal UI
+                // --- Edit Stock Modal
                 editStockModal: document.getElementById('edit-stock-modal'),
                 closeEditStockModalBtn: document.getElementById('close-edit-stock-modal-btn'),
                 editStockProductTitle: document.getElementById('edit-stock-product-title'),
                 editStockForm: document.getElementById('edit-stock-form'),
-                editStockQuantityInput: document.getElementById('edit-stock-quantity')
+                editStockQuantityInput: document.getElementById('edit-stock-quantity'),
+                
+                // --- Confirm Modal
+                confirmModal: document.getElementById('confirm-modal'),
+                confirmTitle: document.getElementById('confirm-title'),
+                confirmMessage: document.getElementById('confirm-message'),
+                confirmCancelBtn: document.getElementById('confirm-cancel-btn'),
+                confirmOkBtn: document.getElementById('confirm-ok-btn'),
             };
 
             // --- Core Functions ---
-
+            
+            /**
+             * Carrega os dados salvos do localStorage ao iniciar.
+             */
             function loadData() {
                 const savedData = localStorage.getItem('salesStockData');
                 if (savedData) {
                     data = JSON.parse(savedData);
-                    // Basic data sanitation for forward compatibility
+                    // Garante que a estrutura de dados seja consistente
                     if (!data.salesHistory) data.salesHistory = [];
                     if (!data.stockHistory) data.stockHistory = [];
                     if (!data.stock) data.stock = { p25: 0, p35: 0 };
@@ -789,12 +999,19 @@
                 updateProfileUI();
                 populateMonthFilter();
                 updateUI();
+                updateDailySummary();
             }
 
+            /**
+             * Salva o estado atual dos dados no localStorage.
+             */
             function saveData() {
                 localStorage.setItem('salesStockData', JSON.stringify(data));
             }
             
+            /**
+             * Atualiza a interface do perfil com nome, foto e data.
+             */
             function updateProfileUI() {
                 ui.userName.textContent = data.profile.name;
                 
@@ -814,23 +1031,20 @@
                 ui.currentDate.textContent = capitalizedDate;
             }
 
+            /**
+             * Atualiza toda a interface (dashboard, estoque, etc.) com base nos filtros.
+             */
             function updateUI() {
-                const selectedDate = ui.dateFilter.value; // Format: YYYY-MM-DD
+                const selectedDate = ui.dateFilter.value;
                 const selectedMonth = ui.monthFilter.value;
                 let filteredSales = data.salesHistory;
 
+                // Aplica filtros de data ou mês
                 if (selectedDate) {
-                    // The input date is YYYY-MM-DD. Adding T00:00:00 ensures it's treated as local time, not UTC midnight.
-                    // This prevents timezone-related "off-by-one-day" errors.
                     const filterDate = new Date(selectedDate + 'T00:00:00');
                     const filterDateKey = filterDate.toLocaleDateString('pt-BR');
-
-                    filteredSales = data.salesHistory.filter(sale => {
-                        const saleDateKey = new Date(sale.date).toLocaleDateString('pt-BR');
-                        return saleDateKey === filterDateKey;
-                    });
+                    filteredSales = data.salesHistory.filter(sale => new Date(sale.date).toLocaleDateString('pt-BR') === filterDateKey);
                     
-                    // Visually sync month filter
                     const [year, month] = selectedDate.split('-');
                     const monthValue = `${year}-${month}`;
                      if ([...ui.monthFilter.options].some(opt => opt.value === monthValue)) {
@@ -838,7 +1052,6 @@
                     } else {
                         ui.monthFilter.value = 'all';
                     }
-
                 } else if (selectedMonth !== 'all' && selectedMonth) {
                     filteredSales = data.salesHistory.filter(sale => {
                         const saleDate = new Date(sale.date);
@@ -847,6 +1060,7 @@
                     });
                 }
                 
+                // Calcula estatísticas para o Relatório
                 const stats = filteredSales.reduce((acc, sale) => {
                     acc.totalPairs += sale.quantity;
                     acc.totalRevenue += sale.quantity * sale.price;
@@ -860,24 +1074,7 @@
                 ui.p25Sold.textContent = stats.p25_sold;
                 ui.p35Sold.textContent = stats.p35_sold;
 
-                // --- Daily Sales Calculation (ALWAYS for today, independent of filter) ---
-                const today = new Date();
-                const todayKey = today.toLocaleDateString('pt-BR'); 
-                
-                const formattedDate = today.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-                ui.dailyRevenueTitle.innerHTML = `Vendas de Hoje <span style="font-weight: 400; color: rgba(255,255,255,0.8);">${formattedDate}</span>`;
-
-                const dailyRevenueTotal = data.salesHistory.reduce((acc, sale) => {
-                    const saleKey = new Date(sale.date).toLocaleDateString('pt-BR');
-                    if (saleKey === todayKey) {
-                        return acc + (sale.quantity * sale.price);
-                    }
-                    return acc;
-                }, 0);
-
-                ui.dailyRevenue.textContent = `R$ ${dailyRevenueTotal.toFixed(2).replace('.', ',')}`;
-
-
+                // Atualiza a interface do Estoque
                 ui.stock25.textContent = data.stock.p25;
                 ui.stock35.textContent = data.stock.p35;
                 const totalStockValue = (data.stock.p25 * products.p25.price) + (data.stock.p35 * products.p35.price);
@@ -885,10 +1082,34 @@
                 const totalStockQuantity = data.stock.p25 + data.stock.p35;
                 ui.totalStockQuantity.textContent = totalStockQuantity;
                 
+                // Atualiza o histórico de vendas e as últimas adições de estoque
                 renderSalesHistory(filteredSales);
                 renderLastAdditions();
+                checkLowStock();
+            }
+            
+            /**
+             * Atualiza o resumo diário na tela principal.
+             */
+            function updateDailySummary() {
+                 const today = new Date();
+                const todayKey = today.toLocaleDateString('pt-BR'); 
+                
+                const dailyStats = data.salesHistory.reduce((acc, sale) => {
+                    if (new Date(sale.date).toLocaleDateString('pt-BR') === todayKey) {
+                        acc.totalRevenue += sale.quantity * sale.price;
+                        acc.totalPairs += sale.quantity;
+                    }
+                    return acc;
+                }, { totalRevenue: 0, totalPairs: 0 });
+                
+                ui.dailyRevenueSummary.textContent = `R$ ${dailyStats.totalRevenue.toFixed(2).replace('.', ',')}`;
+                ui.dailyPairsSummary.textContent = dailyStats.totalPairs;
             }
 
+            /**
+             * Exibe a última adição de estoque e o botão para desfazer.
+             */
             function renderLastAdditions() {
                 const lastAdditionP25 = [...data.stockHistory].filter(item => item.productId === 'p25').pop();
                 const lastAdditionP35 = [...data.stockHistory].filter(item => item.productId === 'p35').pop();
@@ -914,6 +1135,18 @@
                 }
             }
             
+            /**
+             * Verifica e aplica avisos de estoque baixo.
+             */
+            function checkLowStock() {
+                const lowStockThreshold = 5;
+                ui.stockCardP25.classList.toggle('low-stock-warning', data.stock.p25 > 0 && data.stock.p25 <= lowStockThreshold);
+                ui.stockCardP35.classList.toggle('low-stock-warning', data.stock.p35 > 0 && data.stock.p35 <= lowStockThreshold);
+            }
+            
+            /**
+             * Preenche o seletor de filtro de mês com base nas vendas existentes.
+             */
             function populateMonthFilter() {
                 const months = new Set();
                 data.salesHistory.forEach(sale => {
@@ -937,6 +1170,9 @@
                 ui.monthFilter.value = currentFilterValue || 'all';
             }
 
+            /**
+             * Renderiza a lista de vendas no histórico.
+             */
             function renderSalesHistory(sales) {
                 ui.salesHistoryList.innerHTML = '';
                 if (sales.length === 0) {
@@ -968,8 +1204,12 @@
                 });
             }
 
+            /**
+             * Exibe uma mensagem amigável na tela.
+             */
             function showMessage(message, type = 'success') {
-                ui.messageBox.textContent = message;
+                const icon = type === 'success' ? '✅' : '⚠️';
+                ui.messageBox.innerHTML = `${icon} ${message}`;
                 ui.messageBox.className = type;
                 ui.messageBox.classList.add('show');
                 
@@ -977,25 +1217,57 @@
                     ui.messageBox.classList.remove('show');
                 }, 3000);
             }
+            
+            /**
+             * Mostra um modal de confirmação antes de executar uma ação.
+             */
+            function showConfirmation(title, message, onConfirm) {
+                ui.confirmTitle.textContent = title;
+                ui.confirmMessage.textContent = message;
+                ui.confirmModal.classList.add('show');
 
-            function deleteSale(saleId) {
-                const saleIndex = data.salesHistory.findIndex(sale => sale.date === saleId);
-
-                if (saleIndex === -1) {
-                    showMessage('Erro: Venda não encontrada.', 'error');
-                    return;
-                }
-
-                const saleToDelete = data.salesHistory[saleIndex];
+                // Garante que os eventos antigos sejam removidos para evitar execuções múltiplas
+                const newOkBtn = ui.confirmOkBtn.cloneNode(true);
+                ui.confirmOkBtn.parentNode.replaceChild(newOkBtn, ui.confirmOkBtn);
+                ui.confirmOkBtn = newOkBtn;
                 
-                data.stock[saleToDelete.productId] += saleToDelete.quantity;
-                data.salesHistory.splice(saleIndex, 1);
+                const newCancelBtn = ui.confirmCancelBtn.cloneNode(true);
+                ui.confirmCancelBtn.parentNode.replaceChild(newCancelBtn, ui.confirmCancelBtn);
+                ui.confirmCancelBtn = newCancelBtn;
 
-                saveData();
-                populateMonthFilter();
-                updateUI();
+                ui.confirmOkBtn.addEventListener('click', () => {
+                    onConfirm();
+                    ui.confirmModal.classList.remove('show');
+                });
+                ui.confirmCancelBtn.addEventListener('click', () => {
+                    ui.confirmModal.classList.remove('show');
+                });
+            }
 
-                showMessage('Venda excluída e estoque restaurado.', 'success');
+            /**
+             * Lida com a exclusão de uma venda após confirmação.
+             */
+            function deleteSale(saleId) {
+                showConfirmation('Apagar Venda', 'Tem certeza que quer apagar esta venda? O estoque será devolvido.', () => {
+                    const saleIndex = data.salesHistory.findIndex(sale => sale.date === saleId);
+
+                    if (saleIndex === -1) {
+                        showMessage('Erro: Venda não encontrada.', 'error');
+                        return;
+                    }
+
+                    const saleToDelete = data.salesHistory[saleIndex];
+                    
+                    data.stock[saleToDelete.productId] += saleToDelete.quantity;
+                    data.salesHistory.splice(saleIndex, 1);
+
+                    saveData();
+                    populateMonthFilter();
+                    updateUI();
+                    updateDailySummary();
+
+                    showMessage('Venda apagada e estoque corrigido!', 'success');
+                });
             }
             
             // --- Profile Editing Logic ---
@@ -1041,6 +1313,8 @@
 
             // --- Sale Modal Logic ---
             function openSaleModal() {
+                ui.stockDisplayP25.textContent = `📦 Estoque: ${data.stock.p25}`;
+                ui.stockDisplayP35.textContent = `📦 Estoque: ${data.stock.p35}`;
                 ui.saleStep1.classList.remove('hidden');
                 ui.saleStep2.classList.add('hidden');
                 ui.saleModal.classList.add('show');
@@ -1054,7 +1328,7 @@
             // --- Edit Stock Modal Logic ---
             function openEditStockModal(productId) {
                 selectedProductForStockEdit = productId;
-                const productName = products[productId].name.split(' ')[0]; // Get "Rasteirinha"
+                const productName = products[productId].name.split(' ')[0];
                 ui.editStockProductTitle.textContent = `Editar Estoque: ${productName}`;
                 ui.editStockQuantityInput.value = data.stock[productId];
                 ui.editStockModal.classList.add('show');
@@ -1065,6 +1339,23 @@
                 ui.editStockModal.classList.remove('show');
                 ui.editStockForm.reset();
                 selectedProductForStockEdit = null;
+            }
+            
+            // --- Navigation Logic ---
+            function setupNavigation() {
+                ui.navButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        const targetViewId = button.dataset.view;
+                        
+                        ui.views.forEach(view => {
+                            view.classList.toggle('hidden', view.id !== targetViewId);
+                        });
+                        
+                        ui.navButtons.forEach(btn => {
+                            btn.classList.toggle('active', btn === button);
+                        });
+                    });
+                });
             }
 
 
@@ -1102,7 +1393,7 @@
                 const quantity = parseInt(ui.modalSaleQuantityInput.value, 10);
                 
                 if (isNaN(quantity) || quantity <= 0) { showMessage('Por favor, insira uma quantidade válida.', 'error'); return; }
-                if (quantity > data.stock[selectedProductForSale]) { showMessage('Venda não realizada. Estoque insuficiente!', 'error'); return; }
+                if (quantity > data.stock[selectedProductForSale]) { showMessage('Estoque insuficiente! Você só tem ' + data.stock[selectedProductForSale] + ' par(es).', 'error'); return; }
                 
                 const product = products[selectedProductForSale];
                 data.stock[selectedProductForSale] -= quantity;
@@ -1111,10 +1402,12 @@
                 populateMonthFilter();
                 saveData();
                 updateUI();
-                showMessage(`Venda registrada!`, 'success');
+                updateDailySummary();
+                showMessage(`Venda registrada com sucesso!`, 'success');
                 closeSaleModal();
             });
             
+            // Filters
             ui.monthFilter.addEventListener('change', () => {
                 ui.dateFilter.value = ''; // Clear date filter when month is selected
                 updateUI();
@@ -1149,12 +1442,13 @@
                 closeEditStockModal();
             });
 
+            // Global functions for inline HTML events
             window.addStock = (productId) => {
                 const inputElement = (productId === 'p25') ? ui.addStock25Input : ui.addStock35Input;
                 const quantity = parseInt(inputElement.value, 10);
 
                 if (isNaN(quantity) || quantity <= 0) {
-                    showMessage('Por favor, insira uma quantidade válida para adicionar.', 'error');
+                    showMessage('Por favor, insira uma quantidade para adicionar.', 'error');
                     return;
                 }
                 data.stock[productId] += quantity;
@@ -1167,35 +1461,37 @@
                 
                 saveData();
                 updateUI();
-                showMessage(`${quantity} unidade(s) adicionada(s) ao estoque.`, 'success');
+                showMessage(`${quantity} par(es) adicionado(s) ao estoque.`, 'success');
                 inputElement.value = '';
             }
             
             window.undoLastStockAddition = (productId) => {
-                const stockAdditionsForProduct = data.stockHistory.filter(item => item.productId === productId);
-                if (stockAdditionsForProduct.length === 0) {
-                    showMessage('Nenhuma adição para desfazer.', 'error');
-                    return;
-                }
+                 showConfirmation('Desfazer Adição', 'Tem certeza que quer desfazer a última adição de estoque?', () => {
+                    const stockAdditionsForProduct = data.stockHistory.filter(item => item.productId === productId);
+                    if (stockAdditionsForProduct.length === 0) {
+                        showMessage('Nenhuma adição para desfazer.', 'error');
+                        return;
+                    }
 
-                const lastAddition = stockAdditionsForProduct[stockAdditionsForProduct.length - 1];
-                
-                if (data.stock[productId] < lastAddition.quantity) {
-                     showMessage('Não é possível desfazer. Itens desta adição já foram vendidos.', 'error');
-                     return;
-                }
-                
-                const itemIndex = data.stockHistory.findLastIndex(item => 
-                    item.date === lastAddition.date && item.productId === lastAddition.productId
-                );
+                    const lastAddition = stockAdditionsForProduct[stockAdditionsForProduct.length - 1];
+                    
+                    if (data.stock[productId] < lastAddition.quantity) {
+                         showMessage('Não é possível desfazer. Itens desta adição já foram vendidos.', 'error');
+                         return;
+                    }
+                    
+                    const itemIndex = data.stockHistory.findLastIndex(item => 
+                        item.date === lastAddition.date && item.productId === lastAddition.productId
+                    );
 
-                if (itemIndex > -1) {
-                    data.stock[productId] -= lastAddition.quantity;
-                    data.stockHistory.splice(itemIndex, 1);
-                    saveData();
-                    updateUI();
-                    showMessage('Última adição desfeita com sucesso!', 'success');
-                }
+                    if (itemIndex > -1) {
+                        data.stock[productId] -= lastAddition.quantity;
+                        data.stockHistory.splice(itemIndex, 1);
+                        saveData();
+                        updateUI();
+                        showMessage('Última adição desfeita com sucesso!', 'success');
+                    }
+                 });
             }
 
 
@@ -1203,6 +1499,7 @@
             loadData();
             setupProfileEditing();
             setupPhotoUpload();
+            setupNavigation();
         });
     </script>
 </body>

@@ -820,11 +820,14 @@
                 let filteredSales = data.salesHistory;
 
                 if (selectedDate) {
+                    // The input date is YYYY-MM-DD. Adding T00:00:00 ensures it's treated as local time, not UTC midnight.
+                    // This prevents timezone-related "off-by-one-day" errors.
+                    const filterDate = new Date(selectedDate + 'T00:00:00');
+                    const filterDateKey = filterDate.toLocaleDateString('pt-BR');
+
                     filteredSales = data.salesHistory.filter(sale => {
-                        const saleDate = new Date(sale.date);
-                        // Convert sale date to YYYY-MM-DD in local timezone for accurate comparison
-                        const saleDateString = saleDate.getFullYear() + '-' + String(saleDate.getMonth() + 1).padStart(2, '0') + '-' + String(saleDate.getDate()).padStart(2, '0');
-                        return saleDateString === selectedDate;
+                        const saleDateKey = new Date(sale.date).toLocaleDateString('pt-BR');
+                        return saleDateKey === filterDateKey;
                     });
                     
                     // Visually sync month filter

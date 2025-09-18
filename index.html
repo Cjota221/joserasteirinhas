@@ -159,6 +159,15 @@
             .stock-grid, .stock-summary-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
+            .filter-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        .filter-grid {
+            display: grid;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
         }
 
         /* Card Style */
@@ -621,9 +630,15 @@
             <section id="history" style="margin-top: 2rem;">
                 <h2>Histórico de Vendas</h2>
                 <div class="card">
-                    <div class="form-group">
-                        <label for="month-filter">Filtrar por Mês</label>
-                        <select id="month-filter" class="select"></select>
+                    <div class="filter-grid">
+                        <div class="form-group">
+                            <label for="month-filter">Filtrar por Mês</label>
+                            <select id="month-filter" class="select"></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="date-filter">Filtrar por Dia Específico</label>
+                            <input type="date" id="date-filter" class="select">
+                        </div>
                     </div>
                     <ul id="sales-history-list" class="history-list">
                        <!-- Sales items will be injected here by JS -->
@@ -732,6 +747,7 @@
                 totalStockQuantity: document.getElementById('total-stock-quantity'),
                 messageBox: document.getElementById('message-box'),
                 monthFilter: document.getElementById('month-filter'),
+                dateFilter: document.getElementById('date-filter'),
                 salesHistoryList: document.getElementById('sales-history-list'),
                 noSalesMessage: document.getElementById('no-sales-message'),
                 dailyRevenue: document.getElementById('daily-revenue'),
@@ -799,10 +815,28 @@
             }
 
             function updateUI() {
+                const selectedDate = ui.dateFilter.value; // Format: YYYY-MM-DD
                 const selectedMonth = ui.monthFilter.value;
                 let filteredSales = data.salesHistory;
 
-                if (selectedMonth !== 'all' && selectedMonth) {
+                if (selectedDate) {
+                    filteredSales = data.salesHistory.filter(sale => {
+                        const saleDate = new Date(sale.date);
+                        // Convert sale date to YYYY-MM-DD in local timezone for accurate comparison
+                        const saleDateString = saleDate.getFullYear() + '-' + String(saleDate.getMonth() + 1).padStart(2, '0') + '-' + String(saleDate.getDate()).padStart(2, '0');
+                        return saleDateString === selectedDate;
+                    });
+                    
+                    // Visually sync month filter
+                    const [year, month] = selectedDate.split('-');
+                    const monthValue = `${year}-${month}`;
+                     if ([...ui.monthFilter.options].some(opt => opt.value === monthValue)) {
+                        ui.monthFilter.value = monthValue;
+                    } else {
+                        ui.monthFilter.value = 'all';
+                    }
+
+                } else if (selectedMonth !== 'all' && selectedMonth) {
                     filteredSales = data.salesHistory.filter(sale => {
                         const saleDate = new Date(sale.date);
                         const saleMonthYear = `${saleDate.getFullYear()}-${String(saleDate.getMonth() + 1).padStart(2, '0')}`;
@@ -823,7 +857,7 @@
                 ui.p25Sold.textContent = stats.p25_sold;
                 ui.p35Sold.textContent = stats.p35_sold;
 
-                // --- Daily Sales Calculation (independent of filter) ---
+                // --- Daily Sales Calculation (ALWAYS for today, independent of filter) ---
                 const today = new Date();
                 const todayKey = today.toLocaleDateString('pt-BR'); 
                 
@@ -1078,7 +1112,12 @@
                 closeSaleModal();
             });
             
-            ui.monthFilter.addEventListener('change', updateUI);
+            ui.monthFilter.addEventListener('change', () => {
+                ui.dateFilter.value = ''; // Clear date filter when month is selected
+                updateUI();
+            });
+            
+            ui.dateFilter.addEventListener('change', updateUI);
             
             // Edit Stock Events
             document.querySelectorAll('.editable-stock .value').forEach(el => {
@@ -1165,5 +1204,4 @@
     </script>
 </body>
 </html>
-
 

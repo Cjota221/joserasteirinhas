@@ -1,19 +1,19 @@
 'use strict';
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
 
   /* ══════════════════════════════════════════════
      CONSTANTS
   ══════════════════════════════════════════════ */
-  const STORAGE_KEY       = 'salesStockData';
-  const LOW_STOCK         = 5;
-  const DEFAULT_PRODUCTS  = [
+  const PROFILE_KEY      = 'jose_profile';
+  const LOW_STOCK        = 5;
+  const DEFAULT_PRODUCTS = [
     { id: 'p25', name: 'Rasteirinha', price: 25, active: true },
     { id: 'p35', name: 'Rasteirinha', price: 35, active: true },
   ];
 
   /* ══════════════════════════════════════════════
-     STATE
+     STATE  (in-memory, fonte de verdade da UI)
   ══════════════════════════════════════════════ */
   let data = {
     profile:      { name: 'José', photo: null },
@@ -23,122 +23,96 @@ document.addEventListener('DOMContentLoaded', () => {
     stockHistory: [],
   };
 
-  let saleProductId     = null;  // product chosen in sale modal
-  let editStockId       = null;  // product being edited in stock modal
-  let editingProductId  = null;  // product being edited in product modal
-  let confirmCallback   = null;  // pending confirmation action
+  let saleProductId    = null;
+  let editStockId      = null;
+  let editingProductId = null;
+  let confirmCallback  = null;
 
   /* ══════════════════════════════════════════════
-     DOM SHORTCUTS
+     DOM
   ══════════════════════════════════════════════ */
   const $  = id  => document.getElementById(id);
   const $$ = sel => document.querySelectorAll(sel);
 
   const ui = {
-    /* profile */
-    photoUpload:     $('photo-upload'),
-    profileImage:    $('profile-image'),
-    profileIcon:     $('profile-icon-svg'),
-    userNameWrapper: $('user-name-wrapper'),
-    userName:        $('user-name'),
-    currentDate:     $('current-date'),
-
-    /* navigation */
-    navBtns:  $$('.nav-btn'),
-    views:    $$('.view'),
-
-    /* sell view */
-    newSaleBtn:         $('new-sale-btn'),
-    dailyRevenue:       $('daily-revenue-summary'),
-    dailyPairs:         $('daily-pairs-summary'),
-    productPreviewGrid: $('product-preview-grid'),
-
-    /* stock view */
-    totalStockValue:    $('total-stock-value'),
-    totalStockQty:      $('total-stock-quantity'),
-    stockCardsGrid:     $('stock-cards-grid'),
-
-    /* reports view */
-    reportsTitle:       $('reports-title'),
-    totalRevenue:       $('total-revenue'),
-    totalPairsSold:     $('total-pairs-sold'),
-    salesChart:         $('sales-chart'),
-    productStatsList:   $('product-stats-list'),
-    startDate:          $('start-date-filter'),
-    endDate:            $('end-date-filter'),
-    monthFilter:        $('month-filter'),
-    historyList:        $('sales-history-list'),
-    noSalesMsg:         $('no-sales-message'),
-    exportCsvBtn:       $('export-csv-btn'),
-    exportBackupBtn:    $('export-backup-btn'),
-    restoreBackupBtn:   $('restore-backup-btn'),
-    restoreFileInput:   $('restore-file-input'),
-
-    /* products view */
-    addProductBtn: $('add-product-btn'),
-    productsList:  $('products-list'),
-
-    /* sale modal */
-    saleModal:           $('sale-modal'),
-    saleStep1:           $('sale-step-1'),
-    saleStep2:           $('sale-step-2'),
-    productSelectGrid:   $('product-selection-grid'),
-    saleProductTitle:    $('sale-product-title'),
-    saleQtyForm:         $('sale-quantity-form'),
-    saleQtyInput:        $('modal-sale-quantity'),
-    stockAvailHint:      $('stock-available-hint'),
-    backToProductsBtn:   $('back-to-products-btn'),
-
-    /* edit stock modal */
-    editStockModal:      $('edit-stock-modal'),
-    editStockTitle:      $('edit-stock-product-title'),
-    editStockForm:       $('edit-stock-form'),
-    editStockQty:        $('edit-stock-quantity'),
-
-    /* product modal */
-    productModal:        $('product-modal'),
-    productModalTitle:   $('product-modal-title'),
-    productForm:         $('product-form'),
-    productIdInput:      $('product-id-input'),
-    productNameInput:    $('product-name-input'),
-    productPriceInput:   $('product-price-input'),
-    productFormSubmit:   $('product-form-submit'),
-
-    /* confirm modal */
-    confirmModal:   $('confirm-modal'),
-    confirmTitle:   $('confirm-heading'),
-    confirmMsg:     $('confirm-message'),
-    confirmOkBtn:   $('confirm-ok-btn'),
+    photoUpload:      $('photo-upload'),
+    profileImage:     $('profile-image'),
+    profileIcon:      $('profile-icon-svg'),
+    userNameWrapper:  $('user-name-wrapper'),
+    userName:         $('user-name'),
+    currentDate:      $('current-date'),
+    connDot:          $('conn-dot'),
+    navBtns:          $$('.nav-btn'),
+    views:            $$('.view'),
+    newSaleBtn:       $('new-sale-btn'),
+    dailyRevenue:     $('daily-revenue-summary'),
+    dailyPairs:       $('daily-pairs-summary'),
+    productPreview:   $('product-preview-grid'),
+    totalStockValue:  $('total-stock-value'),
+    totalStockQty:    $('total-stock-quantity'),
+    stockCardsGrid:   $('stock-cards-grid'),
+    reportsTitle:     $('reports-title'),
+    totalRevenue:     $('total-revenue'),
+    totalPairsSold:   $('total-pairs-sold'),
+    salesChart:       $('sales-chart'),
+    productStatsList: $('product-stats-list'),
+    startDate:        $('start-date-filter'),
+    endDate:          $('end-date-filter'),
+    monthFilter:      $('month-filter'),
+    historyList:      $('sales-history-list'),
+    noSalesMsg:       $('no-sales-message'),
+    exportCsvBtn:     $('export-csv-btn'),
+    exportBackupBtn:  $('export-backup-btn'),
+    restoreBackupBtn: $('restore-backup-btn'),
+    restoreFileInput: $('restore-file-input'),
+    addProductBtn:    $('add-product-btn'),
+    productsList:     $('products-list'),
+    saleModal:        $('sale-modal'),
+    saleStep1:        $('sale-step-1'),
+    saleStep2:        $('sale-step-2'),
+    productSelectGrid:$('product-selection-grid'),
+    saleProductTitle: $('sale-product-title'),
+    saleQtyForm:      $('sale-quantity-form'),
+    saleQtyInput:     $('modal-sale-quantity'),
+    stockAvailHint:   $('stock-available-hint'),
+    backToProductsBtn:$('back-to-products-btn'),
+    editStockModal:   $('edit-stock-modal'),
+    editStockTitle:   $('edit-stock-product-title'),
+    editStockForm:    $('edit-stock-form'),
+    editStockQty:     $('edit-stock-quantity'),
+    productModal:     $('product-modal'),
+    productModalTitle:$('product-modal-title'),
+    productForm:      $('product-form'),
+    productIdInput:   $('product-id-input'),
+    productNameInput: $('product-name-input'),
+    productPriceInput:$('product-price-input'),
+    productFormSubmit:$('product-form-submit'),
+    confirmModal:     $('confirm-modal'),
+    confirmTitle:     $('confirm-heading'),
+    confirmMsg:       $('confirm-message'),
+    confirmOkBtn:     $('confirm-ok-btn'),
     confirmCancelBtn: $('confirm-cancel-btn'),
-
-    /* toast */
-    toast: $('toast'),
+    toast:            $('toast'),
   };
 
   /* ══════════════════════════════════════════════
-     UTILITIES
+     UTILS
   ══════════════════════════════════════════════ */
   function genId() {
-    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-      return crypto.randomUUID();
-    }
-    return Date.now().toString(36) + Math.random().toString(36).slice(2);
+    return (typeof crypto !== 'undefined' && crypto.randomUUID)
+      ? crypto.randomUUID()
+      : Date.now().toString(36) + Math.random().toString(36).slice(2);
   }
 
-  function fmt(value) {
-    return 'R$ ' + value.toFixed(2).replace('.', ',');
-  }
+  const fmt = v => 'R$ ' + v.toFixed(2).replace('.', ',');
 
   function fmtDate(iso) {
-    const d = new Date(iso);
-    return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    return new Date(iso).toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric' });
   }
 
   function fmtDateTime(iso) {
-    const d = new Date(iso);
-    return d.toLocaleDateString('pt-BR', {
-      day: '2-digit', month: '2-digit', year: 'numeric',
-      hour: '2-digit', minute: '2-digit',
+    return new Date(iso).toLocaleDateString('pt-BR', {
+      day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit',
     });
   }
 
@@ -147,43 +121,38 @@ document.addEventListener('DOMContentLoaded', () => {
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   }
 
-  function todayKey() { return dateKey(new Date().toISOString()); }
-
-  function getProduct(id) { return data.products.find(p => p.id === id); }
-
-  function activeProducts() { return data.products.filter(p => p.active); }
-
-  function stockOf(id) { return data.stock[id] || 0; }
+  const todayKey   = ()  => dateKey(new Date().toISOString());
+  const getProduct = id  => data.products.find(p => p.id === id);
+  const active     = ()  => data.products.filter(p => p.active);
+  const stockOf    = id  => data.stock[id] || 0;
 
   /* ══════════════════════════════════════════════
      TOAST
   ══════════════════════════════════════════════ */
   let toastTimer = null;
 
-  function toast(message, type = 'success') {
-    const icon = type === 'success'
-      ? `<span style="color:#e7ff6e;margin-right:6px;">✓</span>`
-      : `<span style="color:#ff6b6b;margin-right:6px;">✕</span>`;
-    ui.toast.innerHTML = icon + message;
+  function toast(msg, type = 'success') {
+    const icons = {
+      success: `<span style="color:#e7ff6e;margin-right:6px">✓</span>`,
+      error:   `<span style="color:#ff6b6b;margin-right:6px">✕</span>`,
+      warn:    `<span style="color:#e7ff6e;margin-right:6px">⚡</span>`,
+    };
+    ui.toast.innerHTML = (icons[type] || icons.success) + msg;
     ui.toast.classList.add('show');
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => ui.toast.classList.remove('show'), 3000);
+    toastTimer = setTimeout(() => ui.toast.classList.remove('show'), 3500);
   }
 
   /* ══════════════════════════════════════════════
      MODALS
   ══════════════════════════════════════════════ */
-  function openModal(id)  { $(id).classList.add('show'); }
-  function closeModal(id) { $(id).classList.remove('show'); }
+  const openModal  = id => $(id).classList.add('show');
+  const closeModal = id => $(id).classList.remove('show');
 
-  // Close by clicking overlay background
-  $$('.modal-overlay').forEach(overlay => {
-    overlay.addEventListener('click', e => {
-      if (e.target === overlay) overlay.classList.remove('show');
-    });
+  $$('.modal-overlay').forEach(el => {
+    el.addEventListener('click', e => { if (e.target === el) el.classList.remove('show'); });
   });
 
-  // Close buttons via data-close attribute
   $$('[data-close]').forEach(btn => {
     btn.addEventListener('click', () => closeModal(btn.dataset.close));
   });
@@ -191,9 +160,9 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ══════════════════════════════════════════════
      CONFIRM DIALOG
   ══════════════════════════════════════════════ */
-  function confirm(title, message, onOk) {
+  function confirm(title, msg, onOk) {
     ui.confirmTitle.textContent = title;
-    ui.confirmMsg.textContent   = message;
+    ui.confirmMsg.textContent   = msg;
     confirmCallback = onOk;
     openModal('confirm-modal');
   }
@@ -209,111 +178,55 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   /* ══════════════════════════════════════════════
-     DATA — LOAD & MIGRATE
+     CONNECTION STATUS
   ══════════════════════════════════════════════ */
-  function load() {
+  function setConnStatus(online) {
+    if (!ui.connDot) return;
+    ui.connDot.classList.toggle('conn-dot-offline', !online);
+    ui.connDot.title = online
+      ? (DB.queueLength() > 0 ? `Online — ${DB.queueLength()} ação(ões) na fila` : 'Online')
+      : 'Sem internet';
+  }
+
+  function setupConnectionStatus() {
+    setConnStatus(navigator.onLine);
+
+    window.addEventListener('online', async () => {
+      setConnStatus(true);
+      toast('Conexão restaurada — sincronizando…', 'warn');
+      const n = await DB.processQueue();
+      if (n > 0) {
+        toast(`${n} ação(ões) sincronizada(s)!`);
+        await reloadFromSupabase();
+      }
+      setConnStatus(true);
+    });
+
+    window.addEventListener('offline', () => {
+      setConnStatus(false);
+      toast('Sem internet — dados salvos localmente', 'warn');
+    });
+  }
+
+  /* ══════════════════════════════════════════════
+     PROFILE  (fica no localStorage — é do dispositivo)
+  ══════════════════════════════════════════════ */
+  function loadProfile() {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        data = migrate(JSON.parse(raw));
-      } else {
-        /* First launch — seed with default products */
-        data.products = DEFAULT_PRODUCTS.map(p => ({
-          ...p, created_at: new Date().toISOString(),
-        }));
-        DEFAULT_PRODUCTS.forEach(p => { data.stock[p.id] = 0; });
-      }
-    } catch (err) {
-      console.warn('Erro ao carregar dados:', err);
-    }
+      const raw = localStorage.getItem(PROFILE_KEY);
+      if (raw) return JSON.parse(raw);
+      // Migrar do formato antigo
+      const old = JSON.parse(localStorage.getItem('salesStockData') || '{}');
+      return old.profile || { name: 'José', photo: null };
+    } catch { return { name: 'José', photo: null }; }
   }
 
-  function migrate(raw) {
-    const out = {
-      profile:      raw.profile || { name: 'José', photo: null },
-      products:     [],
-      stock:        {},
-      salesHistory: [],
-      stockHistory: [],
-    };
-
-    /* ── products ── */
-    if (Array.isArray(raw.products) && raw.products.length) {
-      out.products = raw.products.map(p => ({
-        id:         p.id,
-        name:       p.name,
-        price:      Number(p.price),
-        active:     p.active !== undefined ? Boolean(p.active) : true,
-        created_at: p.created_at || new Date().toISOString(),
-      }));
-    } else {
-      /* Old format: no products array → seed defaults */
-      out.products = DEFAULT_PRODUCTS.map(p => ({
-        ...p, created_at: new Date().toISOString(),
-      }));
-    }
-
-    /* Ensure built-in defaults always exist */
-    DEFAULT_PRODUCTS.forEach(dp => {
-      if (!out.products.find(p => p.id === dp.id)) {
-        out.products.push({ ...dp, created_at: new Date().toISOString() });
-      }
-    });
-
-    /* ── stock ── */
-    out.products.forEach(p => {
-      out.stock[p.id] = (raw.stock && raw.stock[p.id] !== undefined)
-        ? Number(raw.stock[p.id]) : 0;
-    });
-
-    /* ── salesHistory ── */
-    if (Array.isArray(raw.salesHistory)) {
-      out.salesHistory = raw.salesHistory.map(s => ({
-        id:        s.id || genId(),
-        productId: s.productId,
-        quantity:  Number(s.quantity),
-        price:     Number(s.price),
-        date:      s.date,
-      }));
-    }
-
-    /* ── stockHistory ── */
-    if (Array.isArray(raw.stockHistory)) {
-      out.stockHistory = raw.stockHistory.map(h => ({
-        id:        h.id || genId(),
-        productId: h.productId,
-        quantity:  Number(h.quantity),
-        date:      h.date,
-      }));
-    }
-
-    return out;
+  function saveProfile() {
+    localStorage.setItem(PROFILE_KEY, JSON.stringify(data.profile));
   }
 
-  function save() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  }
-
-  /* ══════════════════════════════════════════════
-     NAVIGATION
-  ══════════════════════════════════════════════ */
-  function setupNav() {
-    ui.navBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const target = btn.dataset.view;
-        ui.views.forEach(v => v.classList.toggle('hidden', v.id !== target));
-        ui.navBtns.forEach(b => b.classList.toggle('active', b === btn));
-        if (target === 'reports-view') renderChart();
-      });
-    });
-  }
-
-  /* ══════════════════════════════════════════════
-     PROFILE
-  ══════════════════════════════════════════════ */
   function updateProfile() {
     ui.userName.textContent = data.profile.name;
-
     if (data.profile.photo) {
       ui.profileImage.src = data.profile.photo;
       ui.profileImage.classList.remove('hidden');
@@ -322,10 +235,9 @@ document.addEventListener('DOMContentLoaded', () => {
       ui.profileImage.classList.add('hidden');
       ui.profileIcon.classList.remove('hidden');
     }
-
-    const now  = new Date();
-    const opts = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
-    const str  = now.toLocaleDateString('pt-BR', opts);
+    const str = new Date().toLocaleDateString('pt-BR', {
+      weekday:'long', day:'numeric', month:'long', year:'numeric',
+    });
     ui.currentDate.textContent = str.charAt(0).toUpperCase() + str.slice(1);
   }
 
@@ -335,15 +247,13 @@ document.addEventListener('DOMContentLoaded', () => {
       inp.className = 'user-name-edit-input';
       inp.type      = 'text';
       inp.value     = data.profile.name;
-
-      const commit = () => {
-        const val = inp.value.trim();
-        if (val) { data.profile.name = val; save(); }
+      const save = () => {
+        const v = inp.value.trim();
+        if (v) { data.profile.name = v; saveProfile(); }
         updateProfile();
         ui.userNameWrapper.replaceChild(ui.userName, inp);
       };
-
-      inp.addEventListener('blur',    commit);
+      inp.addEventListener('blur',    save);
       inp.addEventListener('keydown', e => e.key === 'Enter' && inp.blur());
       ui.userNameWrapper.replaceChild(ui.userName, inp);
       inp.focus();
@@ -355,7 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const reader = new FileReader();
       reader.onload = () => {
         data.profile.photo = reader.result;
-        save(); updateProfile();
+        saveProfile(); updateProfile();
         toast('Foto atualizada!');
       };
       reader.readAsDataURL(file);
@@ -363,70 +273,129 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ══════════════════════════════════════════════
+     NAVIGATION
+  ══════════════════════════════════════════════ */
+  function setupNav() {
+    ui.navBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const t = btn.dataset.view;
+        ui.views.forEach(v => v.classList.toggle('hidden', v.id !== t));
+        ui.navBtns.forEach(b => b.classList.toggle('active', b === btn));
+        if (t === 'reports-view') renderChart();
+      });
+    });
+  }
+
+  /* ══════════════════════════════════════════════
+     DATA — CARREGAR DO SUPABASE (com fallback cache)
+  ══════════════════════════════════════════════ */
+  async function loadData() {
+    data.profile = loadProfile();
+
+    if (navigator.onLine) {
+      try {
+        const fetched = await DB.fetchAll();
+        data.products     = fetched.products;
+        data.stock        = fetched.stock;
+        data.salesHistory = fetched.salesHistory;
+        data.stockHistory = fetched.stockHistory;
+        DB.Cache.set(fetched);
+        return;
+      } catch (err) {
+        console.warn('[loadData] Supabase falhou:', err);
+        toast('Erro ao carregar — usando cache local', 'error');
+      }
+    }
+
+    // Fallback: cache local
+    const cached = DB.Cache.get();
+    if (cached) {
+      data.products     = cached.products     || [];
+      data.stock        = cached.stock        || {};
+      data.salesHistory = cached.salesHistory || [];
+      data.stockHistory = cached.stockHistory || [];
+      if (!navigator.onLine) toast('Sem internet — dados do último acesso', 'warn');
+      return;
+    }
+
+    // Nenhum dado disponível
+    data.products = DEFAULT_PRODUCTS.map(p => ({
+      ...p, created_at: new Date().toISOString(),
+    }));
+    DEFAULT_PRODUCTS.forEach(p => { data.stock[p.id] = 0; });
+    if (!navigator.onLine) toast('Sem internet e sem cache', 'warn');
+  }
+
+  async function reloadFromSupabase() {
+    try {
+      const fetched = await DB.fetchAll();
+      data.products     = fetched.products;
+      data.stock        = fetched.stock;
+      data.salesHistory = fetched.salesHistory;
+      data.stockHistory = fetched.stockHistory;
+      DB.Cache.set(fetched);
+      refresh();
+    } catch (err) {
+      console.warn('[reload] falhou:', err);
+    }
+  }
+
+  /* ══════════════════════════════════════════════
      SELL VIEW
   ══════════════════════════════════════════════ */
   function updateDailySummary() {
     const tk   = todayKey();
-    const stat = data.salesHistory.reduce((acc, s) => {
-      if (dateKey(s.date) === tk) {
-        acc.rev   += s.quantity * s.price;
-        acc.pairs += s.quantity;
-      }
-      return acc;
+    const stat = data.salesHistory.reduce((a, s) => {
+      if (dateKey(s.date) === tk) { a.rev += s.quantity * s.price; a.pairs += s.quantity; }
+      return a;
     }, { rev: 0, pairs: 0 });
-
     ui.dailyRevenue.textContent = fmt(stat.rev);
     ui.dailyPairs.textContent   = stat.pairs;
   }
 
   function renderProductPreview() {
-    const active = activeProducts();
-    ui.productPreviewGrid.innerHTML = '';
-
-    if (!active.length) {
-      ui.productPreviewGrid.innerHTML = '<p class="no-data-text">Nenhum produto ativo.</p>';
+    const ap = active();
+    ui.productPreview.innerHTML = '';
+    if (!ap.length) {
+      ui.productPreview.innerHTML = '<p class="no-data-text">Nenhum produto ativo.</p>';
       return;
     }
-
-    active.forEach(p => {
-      const qty     = stockOf(p.id);
-      const low     = qty > 0 && qty <= LOW_STOCK;
-      const card    = document.createElement('div');
-      card.className = 'product-preview-card';
-      card.innerHTML = `
+    ap.forEach(p => {
+      const q   = stockOf(p.id);
+      const low = q > 0 && q <= LOW_STOCK;
+      const el  = document.createElement('div');
+      el.className = 'product-preview-card';
+      el.innerHTML = `
         <p class="product-preview-name">${p.name}</p>
         <p class="product-preview-price">${fmt(p.price)}</p>
-        <p class="product-preview-stock">${qty} par${qty !== 1 ? 'es' : ''} em estoque</p>
+        <p class="product-preview-stock">${q} par${q !== 1 ? 'es' : ''} em estoque</p>
         ${low ? '<span class="badge-low-stock">⚠ Estoque Baixo</span>' : ''}
       `;
-      ui.productPreviewGrid.appendChild(card);
+      ui.productPreview.appendChild(el);
     });
   }
 
   /* ── Sale Modal ── */
   function openSaleModal() {
-    const active = activeProducts();
+    const ap = active();
     ui.productSelectGrid.innerHTML = '';
-
-    if (!active.length) {
-      ui.productSelectGrid.innerHTML =
-        '<p class="no-data-text" style="grid-column:1/-1">Cadastre produtos na aba Produtos.</p>';
+    if (!ap.length) {
+      ui.productSelectGrid.innerHTML = '<p class="no-data-text" style="grid-column:1/-1">Cadastre produtos na aba Produtos.</p>';
     } else {
-      active.forEach(p => {
-        const qty = stockOf(p.id);
+      ap.forEach(p => {
+        const q   = stockOf(p.id);
         const btn = document.createElement('button');
         btn.className         = 'btn-product-select';
         btn.dataset.productId = p.id;
         btn.innerHTML = `
           <span class="btn-product-select-name">${p.name}</span>
           <span class="btn-product-select-price">${fmt(p.price)}</span>
-          <span class="btn-product-select-stock">📦 ${qty} em estoque</span>
+          <span class="btn-product-select-stock">📦 ${q} em estoque</span>
         `;
         btn.addEventListener('click', () => pickProduct(p.id));
         ui.productSelectGrid.appendChild(btn);
       });
     }
-
     ui.saleStep1.classList.remove('hidden');
     ui.saleStep2.classList.add('hidden');
     ui.saleQtyForm.reset();
@@ -435,10 +404,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function pickProduct(id) {
     saleProductId = id;
-    const p   = getProduct(id);
-    const qty = stockOf(id);
+    const p = getProduct(id);
+    const q = stockOf(id);
     ui.saleProductTitle.textContent = `${p.name} — ${fmt(p.price)}`;
-    ui.stockAvailHint.textContent   = `${qty} par${qty !== 1 ? 'es' : ''} disponível${qty !== 1 ? 'is' : ''}`;
+    ui.stockAvailHint.textContent   = `${q} par${q !== 1 ? 'es' : ''} disponível${q !== 1 ? 'is' : ''}`;
     ui.saleStep1.classList.add('hidden');
     ui.saleStep2.classList.remove('hidden');
     ui.saleQtyInput.value = '';
@@ -457,19 +426,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const qty   = parseInt(ui.saleQtyInput.value, 10);
     const stock = stockOf(saleProductId);
 
-    if (!qty || qty <= 0)  { toast('Insira uma quantidade válida.', 'error'); return; }
-    if (qty > stock) { toast(`Estoque insuficiente. Apenas ${stock} disponível.`, 'error'); return; }
+    if (!qty || qty <= 0) { toast('Insira uma quantidade válida.', 'error'); return; }
+    if (qty > stock)       { toast(`Estoque insuficiente. Apenas ${stock} disponível.`, 'error'); return; }
 
-    const p = getProduct(saleProductId);
+    const p     = getProduct(saleProductId);
+    const date  = new Date().toISOString();
+    const saleId = genId();
+
+    // Atualiza local imediatamente (otimista)
     data.stock[saleProductId] -= qty;
-    data.salesHistory.push({
-      id: genId(), productId: saleProductId,
-      quantity: qty, price: p.price,
-      date: new Date().toISOString(),
-    });
+    data.salesHistory.unshift({ id: saleId, productId: saleProductId, quantity: qty, price: p.price, date });
 
-    save(); refresh(); closeModal('sale-modal');
+    refresh();
+    closeModal('sale-modal');
     toast('Venda registrada!');
+
+    // Persiste no Supabase em background
+    DB.registerSale(saleProductId, qty, p.price, date)
+      .then(res => {
+        if (res.queued) toast('Sem internet — venda na fila', 'warn');
+        setConnStatus(navigator.onLine);
+      })
+      .catch(() => toast('Erro ao salvar no Supabase', 'error'));
   });
 
   ui.newSaleBtn.addEventListener('click', openSaleModal);
@@ -479,27 +457,22 @@ document.addEventListener('DOMContentLoaded', () => {
   ══════════════════════════════════════════════ */
   function updateStockSummary() {
     let val = 0, qty = 0;
-    data.products.forEach(p => {
-      const q = stockOf(p.id);
-      val += q * p.price;
-      qty += q;
-    });
+    data.products.forEach(p => { const q = stockOf(p.id); val += q * p.price; qty += q; });
     ui.totalStockValue.textContent = fmt(val);
     ui.totalStockQty.textContent   = qty;
   }
 
   function renderStockCards() {
     ui.stockCardsGrid.innerHTML = '';
-
     if (!data.products.length) {
       ui.stockCardsGrid.innerHTML = '<p class="no-data-text">Nenhum produto cadastrado.</p>';
       return;
     }
-
     data.products.forEach(p => {
       const qty  = stockOf(p.id);
       const low  = p.active && qty > 0 && qty <= LOW_STOCK;
-      const last = [...data.stockHistory].filter(h => h.productId === p.id).pop();
+      // Último histórico deste produto (stockHistory está ordem DESC)
+      const last = data.stockHistory.find(h => h.productId === p.id);
 
       const lastHtml = last
         ? `<div class="last-addition">
@@ -535,11 +508,9 @@ document.addEventListener('DOMContentLoaded', () => {
     ui.stockCardsGrid.querySelectorAll('[data-edit-stock]').forEach(el => {
       el.addEventListener('click', () => openEditStockModal(el.dataset.editStock));
     });
-
     ui.stockCardsGrid.querySelectorAll('[data-add-stock]').forEach(btn => {
       btn.addEventListener('click', () => addStock(btn.dataset.addStock));
     });
-
     ui.stockCardsGrid.querySelectorAll('[data-undo]').forEach(btn => {
       btn.addEventListener('click', () => undoStock(btn.dataset.undo));
     });
@@ -550,38 +521,47 @@ document.addEventListener('DOMContentLoaded', () => {
     const qty   = parseInt(input.value, 10);
     if (!qty || qty <= 0) { toast('Insira uma quantidade válida.', 'error'); return; }
 
+    const date    = new Date().toISOString();
+    const entryId = genId();
+
+    // Atualiza local
     data.stock[productId] = (data.stock[productId] || 0) + qty;
-    data.stockHistory.push({
-      id: genId(), productId, quantity: qty,
-      date: new Date().toISOString(),
-    });
-    save(); refresh();
+    data.stockHistory.unshift({ id: entryId, productId, quantity: qty, date });
+
+    refresh();
     toast(`${qty} par${qty > 1 ? 'es' : ''} adicionado${qty > 1 ? 's' : ''}!`);
+    input.value = '';
+
+    DB.addStock(productId, qty, date)
+      .then(res => {
+        if (res.queued) toast('Sem internet — estoque na fila', 'warn');
+        setConnStatus(navigator.onLine);
+      })
+      .catch(() => toast('Erro ao salvar estoque', 'error'));
   }
 
   function undoStock(productId) {
-    const entries = data.stockHistory.filter(h => h.productId === productId);
-    if (!entries.length) { toast('Nenhuma adição para desfazer.', 'error'); return; }
-
-    const last = entries[entries.length - 1];
+    const last = data.stockHistory.find(h => h.productId === productId);
+    if (!last) { toast('Nenhuma adição para desfazer.', 'error'); return; }
     if (stockOf(productId) < last.quantity) {
       toast('Não é possível desfazer — itens já vendidos.', 'error');
       return;
     }
-
     confirm('Desfazer Adição', `Remover +${last.quantity} do estoque?`, () => {
       data.stock[productId] -= last.quantity;
-      let idx = -1;
-      for (let i = data.stockHistory.length - 1; i >= 0; i--) {
-        if (data.stockHistory[i].id === last.id) { idx = i; break; }
-      }
-      if (idx > -1) data.stockHistory.splice(idx, 1);
-      save(); refresh();
+      data.stockHistory = data.stockHistory.filter(h => h.id !== last.id);
+      refresh();
       toast('Adição desfeita!');
+
+      DB.undoStock(last.id, productId, last.quantity)
+        .then(res => {
+          if (res.queued) toast('Será sincronizado ao reconectar', 'warn');
+          setConnStatus(navigator.onLine);
+        })
+        .catch(() => toast('Erro ao desfazer no Supabase', 'error'));
     });
   }
 
-  /* Edit Stock Modal */
   function openEditStockModal(productId) {
     editStockId = productId;
     const p = getProduct(productId);
@@ -597,41 +577,38 @@ document.addEventListener('DOMContentLoaded', () => {
     if (isNaN(qty) || qty < 0) { toast('Quantidade inválida.', 'error'); return; }
 
     data.stock[editStockId] = qty;
-    save(); refresh();
+    refresh();
     closeModal('edit-stock-modal');
     toast('Estoque atualizado!');
+
+    DB.setStock(editStockId, qty)
+      .then(res => {
+        if (res.queued) toast('Será sincronizado ao reconectar', 'warn');
+        setConnStatus(navigator.onLine);
+      })
+      .catch(() => toast('Erro ao salvar estoque', 'error'));
   });
 
   /* ══════════════════════════════════════════════
      REPORTS VIEW
   ══════════════════════════════════════════════ */
   function getFilteredSales() {
-    const startVal = ui.startDate.value;
-    const endVal   = ui.endDate.value;
-    const monthVal = ui.monthFilter.value;
+    const sv = ui.startDate.value, ev = ui.endDate.value, mv = ui.monthFilter.value;
+    let sales = data.salesHistory.slice(), title = 'Relatório Geral';
 
-    let sales = data.salesHistory.slice();
-    let title = 'Relatório Geral';
-
-    if (startVal && endVal) {
-      const s = new Date(startVal + 'T00:00:00');
-      const e = new Date(endVal   + 'T23:59:59');
+    if (sv && ev) {
+      const s = new Date(sv + 'T00:00:00'), e = new Date(ev + 'T23:59:59');
+      sales = sales.filter(x => { const d = new Date(x.date); return d >= s && d <= e; });
+      title = `${fmtDate(sv + 'T12:00:00')} — ${fmtDate(ev + 'T12:00:00')}`;
+    } else if (mv && mv !== 'all') {
       sales = sales.filter(x => {
         const d = new Date(x.date);
-        return d >= s && d <= e;
+        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}` === mv;
       });
-      title = `${fmtDate(startVal + 'T12:00:00')} — ${fmtDate(endVal + 'T12:00:00')}`;
-    } else if (monthVal && monthVal !== 'all') {
-      sales = sales.filter(x => {
-        const d = new Date(x.date);
-        const mk = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-        return mk === monthVal;
-      });
-      const [y, m] = monthVal.split('-');
-      const mname  = new Date(y, m - 1).toLocaleString('pt-BR', { month: 'long' });
-      title = `${mname.charAt(0).toUpperCase() + mname.slice(1)} de ${y}`;
+      const [y, m] = mv.split('-');
+      const mn = new Date(y, m-1).toLocaleString('pt-BR', { month:'long' });
+      title = `${mn.charAt(0).toUpperCase() + mn.slice(1)} de ${y}`;
     }
-
     return { sales, title };
   }
 
@@ -639,26 +616,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const { sales, title } = getFilteredSales();
     ui.reportsTitle.textContent = title;
 
-    const stats = sales.reduce((acc, s) => {
-      acc.revenue += s.quantity * s.price;
-      acc.pairs   += s.quantity;
-      if (!acc.byProduct[s.productId]) acc.byProduct[s.productId] = { qty: 0 };
-      acc.byProduct[s.productId].qty += s.quantity;
-      return acc;
+    const stats = sales.reduce((a, s) => {
+      a.revenue += s.quantity * s.price; a.pairs += s.quantity;
+      if (!a.byProduct[s.productId]) a.byProduct[s.productId] = { qty: 0 };
+      a.byProduct[s.productId].qty += s.quantity;
+      return a;
     }, { revenue: 0, pairs: 0, byProduct: {} });
 
     ui.totalRevenue.textContent   = fmt(stats.revenue);
     ui.totalPairsSold.textContent = stats.pairs;
 
-    /* Product breakdown */
     ui.productStatsList.innerHTML = '';
     data.products.forEach(p => {
-      const pst  = stats.byProduct[p.id] || { qty: 0 };
-      const row  = document.createElement('div');
+      const ps  = stats.byProduct[p.id] || { qty: 0 };
+      const row = document.createElement('div');
       row.className = 'product-stat-row';
       row.innerHTML = `
         <span class="product-stat-name">${p.name} (${fmt(p.price)})</span>
-        <span class="product-stat-value">${pst.qty} pares</span>
+        <span class="product-stat-value">${ps.qty} pares</span>
       `;
       ui.productStatsList.appendChild(row);
     });
@@ -669,15 +644,14 @@ document.addEventListener('DOMContentLoaded', () => {
   function populateMonthFilter() {
     const months = new Set();
     data.salesHistory.forEach(s => {
-      const d  = new Date(s.date);
+      const d = new Date(s.date);
       months.add(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`);
     });
-
     const cur = ui.monthFilter.value;
     ui.monthFilter.innerHTML = '<option value="all">Todos os meses</option>';
     [...months].sort().reverse().forEach(m => {
       const [y, mo] = m.split('-');
-      const name    = new Date(y, mo - 1).toLocaleString('pt-BR', { month: 'long' });
+      const name    = new Date(y, mo-1).toLocaleString('pt-BR', { month:'long' });
       const opt     = document.createElement('option');
       opt.value     = m;
       opt.textContent = `${name.charAt(0).toUpperCase() + name.slice(1)} ${y}`;
@@ -689,22 +663,16 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderHistory(sales) {
     ui.historyList.innerHTML = '';
     const sorted = sales.slice().sort((a, b) => new Date(b.date) - new Date(a.date));
-
-    if (!sorted.length) {
-      ui.noSalesMsg.classList.remove('hidden');
-      return;
-    }
+    if (!sorted.length) { ui.noSalesMsg.classList.remove('hidden'); return; }
     ui.noSalesMsg.classList.add('hidden');
 
     sorted.forEach(s => {
-      const p   = getProduct(s.productId);
-      const nm  = p ? p.name : 'Produto';
-      const pr  = p ? fmt(p.price) : '';
-      const li  = document.createElement('li');
+      const p  = getProduct(s.productId);
+      const li = document.createElement('li');
       li.className = 'history-item';
       li.innerHTML = `
         <div>
-          <span class="history-item-name">${nm} — ${pr}</span>
+          <span class="history-item-name">${p ? p.name : 'Produto'} — ${p ? fmt(p.price) : ''}</span>
           <span class="history-item-meta">${s.quantity} par${s.quantity > 1 ? 'es' : ''} • ${fmtDateTime(s.date)}</span>
         </div>
         <div class="history-item-right">
@@ -729,85 +697,65 @@ document.addEventListener('DOMContentLoaded', () => {
       const s = data.salesHistory[idx];
       data.stock[s.productId] = (data.stock[s.productId] || 0) + s.quantity;
       data.salesHistory.splice(idx, 1);
-      save(); refresh();
+      refresh();
       toast('Venda removida e estoque devolvido!');
+
+      DB.deleteSale(s.id, s.productId, s.quantity)
+        .then(res => {
+          if (res.queued) toast('Será sincronizado ao reconectar', 'warn');
+          setConnStatus(navigator.onLine);
+        })
+        .catch(() => toast('Erro ao remover no Supabase', 'error'));
     });
   }
 
-  /* Sales Chart — last 7 days */
   function renderChart() {
     ui.salesChart.innerHTML = '';
     const days = [];
     const now  = new Date();
-
     for (let i = 6; i >= 0; i--) {
       const d     = new Date(now);
       d.setDate(d.getDate() - i);
       const key   = dateKey(d.toISOString());
-      const label = i === 0
-        ? 'Hoje'
-        : d.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '');
+      const label = i === 0 ? 'Hoje' : d.toLocaleDateString('pt-BR', { weekday:'short' }).replace('.', '');
       days.push({ key, label, rev: 0 });
     }
-
     data.salesHistory.forEach(s => {
       const day = days.find(d => d.key === dateKey(s.date));
       if (day) day.rev += s.quantity * s.price;
     });
-
-    const maxRev  = Math.max(...days.map(d => d.rev), 1);
-    const barArea = 100; /* px */
-
+    const maxRev = Math.max(...days.map(d => d.rev), 1);
     days.forEach(d => {
-      const pct  = Math.round((d.rev / maxRev) * barArea);
-      const col  = document.createElement('div');
+      const pct = Math.round((d.rev / maxRev) * 100);
+      const col = document.createElement('div');
       col.className = 'chart-col';
-
       const valEl = document.createElement('span');
       valEl.className   = 'chart-bar-val';
       valEl.textContent = d.rev > 0 ? fmt(d.rev).replace('R$ ', '') : '';
-
       const bar = document.createElement('div');
-      bar.className = 'chart-bar' + (d.rev === 0 ? ' chart-bar-empty' : '');
+      bar.className  = 'chart-bar' + (d.rev === 0 ? ' chart-bar-empty' : '');
       bar.style.height = `${Math.max(pct, d.rev > 0 ? 6 : 3)}px`;
-
       const dayEl = document.createElement('span');
       dayEl.className   = 'chart-bar-day';
       dayEl.textContent = d.label;
-
-      col.appendChild(valEl);
-      col.appendChild(bar);
-      col.appendChild(dayEl);
+      col.appendChild(valEl); col.appendChild(bar); col.appendChild(dayEl);
       ui.salesChart.appendChild(col);
     });
   }
 
-  /* Filters */
-  ui.monthFilter.addEventListener('change', () => {
-    ui.startDate.value = '';
-    ui.endDate.value   = '';
-    updateReports();
-  });
-
-  const onDateChange = () => {
-    ui.monthFilter.value = 'all';
-    updateReports();
-  };
-
-  ui.startDate.addEventListener('change', onDateChange);
-  ui.endDate.addEventListener('change',   onDateChange);
+  ui.monthFilter.addEventListener('change', () => { ui.startDate.value = ''; ui.endDate.value = ''; updateReports(); });
+  ui.startDate.addEventListener('change', () => { ui.monthFilter.value = 'all'; updateReports(); });
+  ui.endDate.addEventListener('change',   () => { ui.monthFilter.value = 'all'; updateReports(); });
 
   /* ══════════════════════════════════════════════
      PRODUCTS VIEW
   ══════════════════════════════════════════════ */
   function renderProductsList() {
     ui.productsList.innerHTML = '';
-
     if (!data.products.length) {
       ui.productsList.innerHTML = '<p class="no-data-text">Nenhum produto cadastrado.</p>';
       return;
     }
-
     data.products.forEach(p => {
       const qty  = stockOf(p.id);
       const card = document.createElement('div');
@@ -830,11 +778,9 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
       ui.productsList.appendChild(card);
     });
-
     ui.productsList.querySelectorAll('[data-edit-prod]').forEach(btn => {
       btn.addEventListener('click', () => openEditProduct(btn.dataset.editProd));
     });
-
     ui.productsList.querySelectorAll('[data-toggle-prod]').forEach(btn => {
       btn.addEventListener('click', () => toggleProduct(btn.dataset.toggleProd));
     });
@@ -869,8 +815,11 @@ document.addEventListener('DOMContentLoaded', () => {
       `${p.active ? 'Desativar' : 'Ativar'} "${p.name}"?`,
       () => {
         p.active = !p.active;
-        save(); refresh();
+        refresh();
         toast(`Produto ${p.active ? 'ativado' : 'desativado'}!`);
+        DB.toggleProduct(p.id, p.active)
+          .then(res => { if (res.queued) toast('Será sincronizado ao reconectar', 'warn'); setConnStatus(navigator.onLine); })
+          .catch(() => toast('Erro ao atualizar produto', 'error'));
       }
     );
   }
@@ -881,84 +830,71 @@ document.addEventListener('DOMContentLoaded', () => {
     e.preventDefault();
     const name  = ui.productNameInput.value.trim();
     const price = parseFloat(ui.productPriceInput.value);
-
     if (!name)            { toast('Nome é obrigatório.', 'error'); return; }
     if (!price || price <= 0) { toast('Preço inválido.', 'error'); return; }
 
     if (editingProductId) {
       const p = getProduct(editingProductId);
-      p.name  = name;
-      p.price = price;
+      p.name  = name; p.price = price;
       toast('Produto atualizado!');
+      DB.updateProduct(editingProductId, name, price)
+        .then(res => { if (res.queued) toast('Será sincronizado ao reconectar', 'warn'); setConnStatus(navigator.onLine); })
+        .catch(() => toast('Erro ao salvar produto', 'error'));
     } else {
-      const newId = 'p_' + Date.now();
-      data.products.push({
-        id: newId, name, price, active: true,
-        created_at: new Date().toISOString(),
-      });
+      const newId  = 'p_' + Date.now();
+      const newProd = { id: newId, name, price, active: true, created_at: new Date().toISOString() };
+      data.products.push(newProd);
       data.stock[newId] = 0;
       toast('Produto adicionado!');
+      DB.insertProduct(newProd)
+        .then(res => { if (res.queued) toast('Será sincronizado ao reconectar', 'warn'); setConnStatus(navigator.onLine); })
+        .catch(() => toast('Erro ao salvar produto', 'error'));
     }
 
-    save(); refresh();
+    refresh();
     closeModal('product-modal');
   });
 
   /* ══════════════════════════════════════════════
-     EXPORT / IMPORT
+     EXPORT / IMPORT  (permanecem locais)
   ══════════════════════════════════════════════ */
   function downloadBlob(blob, name) {
     const url = URL.createObjectURL(blob);
     const a   = document.createElement('a');
-    a.href     = url;
-    a.download = name;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a); URL.revokeObjectURL(url);
   }
 
   function exportCSV() {
-    if (!data.salesHistory.length) {
-      toast('Nenhuma venda para exportar.', 'error');
-      return;
-    }
-
-    const cols = ['Data', 'Hora', 'Produto', 'Quantidade', 'Preço Unitário', 'Total'];
-    const rows = data.salesHistory
-      .slice()
+    if (!data.salesHistory.length) { toast('Nenhuma venda para exportar.', 'error'); return; }
+    const cols = ['Data','Hora','Produto','Quantidade','Preço Unitário','Total'];
+    const rows = data.salesHistory.slice()
       .sort((a, b) => new Date(a.date) - new Date(b.date))
       .map(s => {
-        const d  = new Date(s.date);
-        const p  = getProduct(s.productId);
-        const nm = p ? p.name : 'Produto';
+        const d = new Date(s.date);
+        const p = getProduct(s.productId);
         return [
           d.toLocaleDateString('pt-BR'),
-          d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-          nm,
+          d.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' }),
+          p ? p.name : 'Produto',
           s.quantity,
           s.price.toFixed(2).replace('.', ','),
           (s.quantity * s.price).toFixed(2).replace('.', ','),
         ].join(';');
       });
-
     const csv  = [cols.join(';'), ...rows].join('\r\n');
-    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
-    const date = new Date().toISOString().slice(0, 10);
-    downloadBlob(blob, `vendas_jose_${date}.csv`);
+    downloadBlob(new Blob(['﻿' + csv], { type:'text/csv;charset=utf-8;' }), `vendas_jose_${new Date().toISOString().slice(0,10)}.csv`);
     toast('CSV exportado!');
   }
 
   function exportBackup() {
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const date = new Date().toISOString().slice(0, 10);
-    downloadBlob(blob, `backup_jose_${date}.json`);
+    downloadBlob(new Blob([JSON.stringify(data, null, 2)], { type:'application/json' }), `backup_jose_${new Date().toISOString().slice(0,10)}.json`);
     toast('Backup exportado!');
   }
 
   ui.exportCsvBtn.addEventListener('click',    exportCSV);
   ui.exportBackupBtn.addEventListener('click', exportBackup);
-
   ui.restoreBackupBtn.addEventListener('click', () => ui.restoreFileInput.click());
 
   ui.restoreFileInput.addEventListener('change', e => {
@@ -971,22 +907,26 @@ document.addEventListener('DOMContentLoaded', () => {
         confirm(
           'Restaurar Backup',
           'Isso vai substituir TODOS os dados atuais. Tem certeza?',
-          () => {
-            data = migrate(parsed);
-            save(); refresh(); updateProfile();
-            toast('Backup restaurado!');
+          async () => {
+            // Restaurar localmente
+            if (parsed.products)     data.products     = parsed.products;
+            if (parsed.stock)        data.stock        = parsed.stock;
+            if (parsed.salesHistory) data.salesHistory = parsed.salesHistory;
+            if (parsed.stockHistory) data.stockHistory = parsed.stockHistory;
+            if (parsed.profile)      { data.profile = parsed.profile; saveProfile(); }
+            DB.Cache.set({ products: data.products, stock: data.stock, salesHistory: data.salesHistory, stockHistory: data.stockHistory });
+            refresh(); updateProfile();
+            toast('Backup restaurado! (os dados serão sincronizados ao Supabase na próxima ação)');
           }
         );
-      } catch {
-        toast('Arquivo inválido.', 'error');
-      }
+      } catch { toast('Arquivo inválido.', 'error'); }
       e.target.value = '';
     };
     reader.readAsText(file);
   });
 
   /* ══════════════════════════════════════════════
-     REFRESH ALL
+     REFRESH COMPLETO DA UI
   ══════════════════════════════════════════════ */
   function refresh() {
     updateDailySummary();
@@ -1002,9 +942,29 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ══════════════════════════════════════════════
      INIT
   ══════════════════════════════════════════════ */
-  load();
-  setupNav();
-  setupProfile();
-  updateProfile();
-  refresh();
+  async function init() {
+    setupNav();
+    setupProfile();
+
+    // Mostra loading enquanto busca do Supabase
+    ui.views.forEach(v => { if (!v.classList.contains('hidden')) {
+      v.innerHTML = '<div class="view-inner"><p class="no-data-text">Carregando dados…</p></div>';
+    }});
+
+    await loadData();
+    updateProfile();
+    refresh();
+    setupConnectionStatus();
+
+    // Processar fila offline residual ao iniciar
+    if (navigator.onLine && DB.queueLength() > 0) {
+      const n = await DB.processQueue();
+      if (n > 0) {
+        toast(`${n} ação(ões) sincronizada(s) da fila!`);
+        await reloadFromSupabase();
+      }
+    }
+  }
+
+  init();
 });

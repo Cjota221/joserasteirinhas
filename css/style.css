@@ -961,6 +961,26 @@ body {
   transform: translateX(-50%) translateY(0);
 }
 
+/* ── Connection status dot ──────────────── */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.conn-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-chartreuse-receipt);
+  flex-shrink: 0;
+  transition: background 0.3s;
+}
+
+.conn-dot.conn-dot-offline {
+  background: var(--color-danger);
+}
+
 /* ── Responsive ─────────────────────────── */
 @media (min-width: 480px) {
   .stock-cards-grid { grid-template-columns: 1fr 1fr; }

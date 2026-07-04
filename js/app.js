@@ -976,12 +976,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupNav();
     setupProfile();
 
-    // Mostra loading enquanto busca do Supabase (preservando o HTML original para restaurar depois)
+    // Mostra loading enquanto busca do Supabase, sem destruir os elementos
+    // originais (senão as referências em `ui` ficam órfãs e o refresh()
+    // depois de carregar os dados escreve em nós que ninguém mais vê).
     const restoreViews = [];
     ui.views.forEach(v => { if (!v.classList.contains('hidden')) {
-      const original = v.innerHTML;
-      v.innerHTML = '<div class="view-inner"><p class="no-data-text">Carregando dados…</p></div>';
-      restoreViews.push(() => { v.innerHTML = original; });
+      const loadingEl = document.createElement('div');
+      loadingEl.className = 'view-inner';
+      loadingEl.innerHTML = '<p class="no-data-text">Carregando dados…</p>';
+      const hiddenChildren = Array.from(v.children);
+      hiddenChildren.forEach(child => { child.style.display = 'none'; });
+      v.appendChild(loadingEl);
+      restoreViews.push(() => {
+        loadingEl.remove();
+        hiddenChildren.forEach(child => { child.style.display = ''; });
+      });
     }});
 
     console.log('[init] chamando loadData()...');

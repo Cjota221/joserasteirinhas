@@ -4,6 +4,7 @@
    SUPABASE CLIENT
    Tabelas: jose_produtos · jose_estoque
             jose_vendas  · jose_historico_estoque
+            jose_categorias_despesa · jose_despesas
    ⚠️ 'total' em jose_vendas é GERADO pelo banco —
       NUNCA inserir esse campo manualmente.
 ══════════════════════════════════════════════ */
@@ -50,6 +51,8 @@ const map = {
   product:    p => ({ id: p.id, name: p.nome, price: Number(p.preco), active: p.ativo, created_at: p.criado_em }),
   sale:       s => ({ id: s.id, productId: s.produto_id, quantity: Number(s.quantidade), price: Number(s.preco_unitario), date: s.vendido_em }),
   stockEntry: h => ({ id: h.id, productId: h.produto_id, quantity: Number(h.quantidade), date: h.adicionado_em }),
+  category:   c => ({ id: c.id, nome: c.nome, icone: c.icone, ativo: c.ativo }),
+  expense:    d => ({ id: d.id, categoriaId: d.categoria_id, descricao: d.descricao, valor: Number(d.valor), data: d.data, criadoEm: d.criado_em }),
 };
 
 /* ══════════════════════════════════════════════
@@ -74,7 +77,7 @@ const DB = {
 
   /* ── Carregar tudo ── */
   async fetchAll() {
-    const [p, e, v, h] = await Promise.all([
+    const [p, e, v, h, c, d] = await Promise.all([
       _sb.from('jose_produtos').select('*').order('preco'),
       _sb.from('jose_estoque').select('*'),
       _sb.from('jose_vendas')
@@ -85,11 +88,18 @@ const DB = {
          .select('*')
          .order('adicionado_em', { ascending: false })
          .limit(200),
+      _sb.from('jose_categorias_despesa').select('*').order('nome'),
+      _sb.from('jose_despesas')
+         .select('id,categoria_id,descricao,valor,data,criado_em')
+         .order('criado_em', { ascending: false })
+         .limit(500),
     ]);
     if (p.error) throw p.error;
     if (e.error) throw e.error;
     if (v.error) throw v.error;
     if (h.error) throw h.error;
+    if (c.error) throw c.error;
+    if (d.error) throw d.error;
 
     const stock = {};
     e.data.forEach(r => { stock[r.produto_id] = r.quantidade; });
@@ -99,6 +109,8 @@ const DB = {
       stock,
       salesHistory: v.data.map(map.sale),
       stockHistory: h.data.map(map.stockEntry),
+      categories:   c.data.map(map.category),
+      expenses:     d.data.map(map.expense),
     };
   },
 
@@ -206,6 +218,32 @@ const DB = {
     if (e3) throw e3;
   },
 
+  /* ── Registrar despesa ── */
+  async registerExpense(categoriaId, descricao, valor, data) {
+    return withOffline(
+      () => this._registerExpense(categoriaId, descricao, valor, data),
+      { type: 'EXPENSE', categoriaId, descricao, valor, data }
+    );
+  },
+  async _registerExpense(categoriaId, descricao, valor, data) {
+    const { error } = await _sb.from('jose_despesas').insert({
+      categoria_id: categoriaId, descricao: descricao || null, valor, data,
+    });
+    if (error) throw error;
+  },
+
+  /* ── Deletar despesa ── */
+  async deleteExpense(expenseId) {
+    return withOffline(
+      () => this._deleteExpense(expenseId),
+      { type: 'DELETE_EXPENSE', expenseId }
+    );
+  },
+  async _deleteExpense(expenseId) {
+    const { error } = await _sb.from('jose_despesas').delete().eq('id', expenseId);
+    if (error) throw error;
+  },
+
   /* ── Produtos CRUD ── */
   async insertProduct(product) {
     return withOffline(
@@ -272,6 +310,8 @@ const DB = {
       INSERT_PRODUCT: () => this._insertProduct(a.product),
       UPDATE_PRODUCT: () => this._updateProduct(a.id, a.name, a.price),
       TOGGLE_PRODUCT: () => this._toggleProduct(a.id, a.active),
+      EXPENSE:        () => this._registerExpense(a.categoriaId, a.descricao, a.valor, a.data),
+      DELETE_EXPENSE: () => this._deleteExpense(a.expenseId),
     };
     if (m[a.type]) return m[a.type]();
     console.warn('[Queue] tipo desconhecido:', a.type);

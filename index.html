@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=20260704">
+  <link rel="stylesheet" href="css/style.css?v=20260704b">
 </head>
 <body>
 
@@ -70,6 +70,10 @@
     </symbol>
     <symbol id="icon-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
       <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+    </symbol>
+    <symbol id="icon-expenses" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="1" x2="12" y2="23"/>
+      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
     </symbol>
   </svg>
 
@@ -235,6 +239,69 @@
       </div>
     </main>
 
+    <!-- ── DESPESAS VIEW ── -->
+    <main id="expenses-view" class="view hidden">
+      <div class="view-inner">
+        <h2 class="section-title">Despesas</h2>
+
+        <div class="two-col-grid">
+          <div class="card card-dark">
+            <span class="card-badge">HOJE</span>
+            <p class="card-label">Gasto Hoje</p>
+            <p class="card-value" id="daily-expense-summary">R$ 0,00</p>
+          </div>
+          <div class="card card-light">
+            <p class="card-label">Gasto no Mês</p>
+            <p class="card-value card-value-ink" id="monthly-expense-summary">R$ 0,00</p>
+          </div>
+        </div>
+
+        <div class="card card-light">
+          <p class="card-label card-label-gap">Registrar Despesa</p>
+          <form id="expense-form" novalidate>
+            <div class="form-group">
+              <label class="form-label" for="expense-category-select">Categoria</label>
+              <select id="expense-category-select" class="input" required></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="expense-description-input">Descrição (opcional)</label>
+              <input type="text" id="expense-description-input" class="input" placeholder="Ex: Almoço no mercado">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="expense-value-input">Valor (R$)</label>
+              <input type="number" id="expense-value-input" class="input" placeholder="0,00" min="0.01" step="0.01" inputmode="decimal" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="expense-date-input">Data</label>
+              <input type="date" id="expense-date-input" class="input" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full">Registrar Despesa</button>
+          </form>
+        </div>
+
+        <div class="card card-light">
+          <p class="card-label card-label-gap">Filtrar por Período</p>
+          <div class="filter-grid">
+            <div class="form-group">
+              <label class="form-label" for="expense-start-date-filter">De</label>
+              <input type="date" id="expense-start-date-filter" class="input">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="expense-end-date-filter">Até</label>
+              <input type="date" id="expense-end-date-filter" class="input">
+            </div>
+          </div>
+          <button type="button" class="btn btn-ghost btn-full" id="expense-clear-filter-btn">Ver despesas de hoje</button>
+        </div>
+
+        <div class="card card-light">
+          <p class="card-label card-label-gap" id="expenses-list-title">Despesas de Hoje</p>
+          <ul id="expenses-list" class="history-list"></ul>
+          <p id="no-expenses-message" class="no-data-text hidden">Nenhuma despesa neste período.</p>
+        </div>
+      </div>
+    </main>
+
   </div><!-- /container -->
 
   <!-- Navigation -->
@@ -254,6 +321,10 @@
     <button class="nav-btn" data-view="products-view">
       <svg class="nav-icon"><use href="#icon-products"></use></svg>
       <span class="nav-label">Produtos</span>
+    </button>
+    <button class="nav-btn" data-view="expenses-view">
+      <svg class="nav-icon"><use href="#icon-expenses"></use></svg>
+      <span class="nav-label">Despesas</span>
     </button>
   </nav>
 
@@ -345,7 +416,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" defer></script>
-  <script src="js/db.js?v=20260704" defer></script>
-  <script src="js/app.js?v=20260704" defer></script>
+  <script src="js/db.js?v=20260704b" defer></script>
+  <script src="js/app.js?v=20260704b" defer></script>
 </body>
 </html>

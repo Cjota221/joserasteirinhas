@@ -11,6 +11,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     { id: 'p25', name: 'Rasteirinha', price: 25, active: true },
     { id: 'p35', name: 'Rasteirinha', price: 35, active: true },
   ];
+  const DEFAULT_CATEGORIES = [
+    { id: 'alimentacao',    nome: 'Alimentação',       icone: '🍽️', ativo: true },
+    { id: 'montagem_ponto', nome: 'Montagem do Ponto', icone: '🏪', ativo: true },
+    { id: 'energia',        nome: 'Energia',           icone: '⚡', ativo: true },
+    { id: 'agua',           nome: 'Água',              icone: '💧', ativo: true },
+    { id: 'internet',       nome: 'Internet',          icone: '📶', ativo: true },
+    { id: 'transporte',     nome: 'Transporte',        icone: '🚗', ativo: true },
+    { id: 'outros',         nome: 'Outros',            icone: '📦', ativo: true },
+  ];
 
   /* ══════════════════════════════════════════════
      STATE  (in-memory, fonte de verdade da UI)
@@ -21,6 +30,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     stock:        {},
     salesHistory: [],
     stockHistory: [],
+    categories:   [],
+    expenses:     [],
   };
 
   let saleProductId    = null;
@@ -93,6 +104,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     confirmOkBtn:     $('confirm-ok-btn'),
     confirmCancelBtn: $('confirm-cancel-btn'),
     toast:            $('toast'),
+    dailyExpense:       $('daily-expense-summary'),
+    monthlyExpense:     $('monthly-expense-summary'),
+    expenseForm:        $('expense-form'),
+    expenseCategory:    $('expense-category-select'),
+    expenseDescription: $('expense-description-input'),
+    expenseValue:       $('expense-value-input'),
+    expenseDate:        $('expense-date-input'),
+    expenseStartDate:   $('expense-start-date-filter'),
+    expenseEndDate:     $('expense-end-date-filter'),
+    expenseClearBtn:    $('expense-clear-filter-btn'),
+    expensesList:       $('expenses-list'),
+    expensesListTitle:  $('expenses-list-title'),
+    noExpensesMsg:      $('no-expenses-message'),
   };
 
   /* ══════════════════════════════════════════════
@@ -125,6 +149,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   const getProduct = id  => data.products.find(p => p.id === id);
   const active     = ()  => data.products.filter(p => p.active);
   const stockOf    = id  => data.stock[id] || 0;
+
+  const getCategory      = id => data.categories.find(c => c.id === id);
+  const activeCategories = ()  => data.categories.filter(c => c.ativo !== false);
 
   /* ══════════════════════════════════════════════
      TOAST
@@ -304,6 +331,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         data.stock        = fetched.stock;
         data.salesHistory = fetched.salesHistory;
         data.stockHistory = fetched.stockHistory;
+        data.categories   = fetched.categories;
+        data.expenses     = fetched.expenses;
         DB.Cache.set(fetched);
         console.log('[loadData] dados atribuídos e cacheados com sucesso');
         return;
@@ -320,6 +349,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       data.stock        = cached.stock        || {};
       data.salesHistory = cached.salesHistory || [];
       data.stockHistory = cached.stockHistory || [];
+      data.categories   = cached.categories   || [];
+      data.expenses     = cached.expenses     || [];
       if (!navigator.onLine) toast('Sem internet — dados do último acesso', 'warn');
       return;
     }
@@ -329,6 +360,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       ...p, created_at: new Date().toISOString(),
     }));
     DEFAULT_PRODUCTS.forEach(p => { data.stock[p.id] = 0; });
+    data.categories = DEFAULT_CATEGORIES;
     if (!navigator.onLine) toast('Sem internet e sem cache', 'warn');
   }
 
@@ -339,6 +371,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       data.stock        = fetched.stock;
       data.salesHistory = fetched.salesHistory;
       data.stockHistory = fetched.stockHistory;
+      data.categories   = fetched.categories;
+      data.expenses     = fetched.expenses;
       DB.Cache.set(fetched);
       refresh();
     } catch (err) {
@@ -886,6 +920,132 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   /* ══════════════════════════════════════════════
+     EXPENSES VIEW
+  ══════════════════════════════════════════════ */
+  function populateCategorySelect() {
+    const cur  = ui.expenseCategory.value;
+    const cats = activeCategories();
+    ui.expenseCategory.innerHTML = cats.map(c => `<option value="${c.id}">${c.icone} ${c.nome}</option>`).join('');
+    if (cur && cats.some(c => c.id === cur)) ui.expenseCategory.value = cur;
+  }
+
+  function updateExpenseSummary() {
+    const tk = todayKey();
+    const mk = tk.slice(0, 7);
+    let dayTotal = 0, monthTotal = 0;
+    data.expenses.forEach(x => {
+      if (x.data === tk)          dayTotal   += x.valor;
+      if (x.data.slice(0, 7) === mk) monthTotal += x.valor;
+    });
+    ui.dailyExpense.textContent   = fmt(dayTotal);
+    ui.monthlyExpense.textContent = fmt(monthTotal);
+  }
+
+  function getFilteredExpenses() {
+    const sv = ui.expenseStartDate.value, ev = ui.expenseEndDate.value;
+    if (sv && ev) {
+      return {
+        expenses: data.expenses.filter(x => x.data >= sv && x.data <= ev),
+        title: `${fmtDate(sv + 'T12:00:00')} — ${fmtDate(ev + 'T12:00:00')}`,
+      };
+    }
+    return { expenses: data.expenses.filter(x => x.data === todayKey()), title: 'Despesas de Hoje' };
+  }
+
+  function renderExpensesList() {
+    const { expenses, title } = getFilteredExpenses();
+    ui.expensesListTitle.textContent = title;
+    ui.expensesList.innerHTML = '';
+
+    const sorted = expenses.slice().sort((a, b) => new Date(b.criadoEm) - new Date(a.criadoEm));
+    if (!sorted.length) { ui.noExpensesMsg.classList.remove('hidden'); return; }
+    ui.noExpensesMsg.classList.add('hidden');
+
+    sorted.forEach(x => {
+      const cat = getCategory(x.categoriaId);
+      const li  = document.createElement('li');
+      li.className = 'history-item';
+      li.innerHTML = `
+        <div>
+          <span class="history-item-name">${cat ? cat.icone + ' ' + cat.nome : 'Despesa'}${x.descricao ? ' — ' + x.descricao : ''}</span>
+          <span class="history-item-meta">${new Date(x.criadoEm).toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' })}</span>
+        </div>
+        <div class="history-item-right">
+          <span class="history-item-value">${fmt(x.valor)}</span>
+          <button class="btn-delete" data-del-expense="${x.id}" title="Excluir despesa">
+            <svg><use href="#icon-trash"></use></svg>
+          </button>
+        </div>
+      `;
+      ui.expensesList.appendChild(li);
+    });
+
+    ui.expensesList.querySelectorAll('[data-del-expense]').forEach(btn => {
+      btn.addEventListener('click', () => deleteExpense(btn.dataset.delExpense));
+    });
+  }
+
+  function deleteExpense(id) {
+    confirm('Apagar Despesa', 'Tem certeza que deseja excluir essa despesa?', () => {
+      const idx = data.expenses.findIndex(x => x.id === id);
+      if (idx === -1) { toast('Despesa não encontrada.', 'error'); return; }
+      data.expenses.splice(idx, 1);
+      refresh();
+      toast('Despesa removida!');
+
+      DB.deleteExpense(id)
+        .then(res => {
+          if (res.queued) toast('Será sincronizado ao reconectar', 'warn');
+          setConnStatus(navigator.onLine);
+        })
+        .catch(err => {
+          console.error('[deleteExpense] falhou:', err);
+          toast('Erro ao remover no Supabase', 'error');
+        });
+    });
+  }
+
+  ui.expenseDate.value = todayKey();
+
+  ui.expenseForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const categoriaId = ui.expenseCategory.value;
+    const descricao    = ui.expenseDescription.value.trim();
+    const valor        = parseFloat(ui.expenseValue.value);
+    const dataStr      = ui.expenseDate.value;
+
+    if (!categoriaId)          { toast('Escolha uma categoria.', 'error'); return; }
+    if (!valor || valor <= 0)  { toast('Valor inválido.', 'error'); return; }
+    if (!dataStr)              { toast('Escolha uma data.', 'error'); return; }
+
+    const expenseId = genId();
+    data.expenses.unshift({ id: expenseId, categoriaId, descricao, valor, data: dataStr, criadoEm: new Date().toISOString() });
+
+    refresh();
+    toast('Despesa registrada!');
+    ui.expenseForm.reset();
+    ui.expenseDate.value = todayKey();
+
+    DB.registerExpense(categoriaId, descricao, valor, dataStr)
+      .then(res => {
+        if (res.queued) toast('Sem internet — despesa na fila', 'warn');
+        setConnStatus(navigator.onLine);
+      })
+      .catch(err => {
+        console.error('[registerExpense] falhou:', err);
+        toast('Erro ao salvar despesa no Supabase', 'error');
+      });
+  });
+
+  ui.expenseStartDate.addEventListener('change', renderExpensesList);
+  ui.expenseEndDate.addEventListener('change',   renderExpensesList);
+  ui.expenseClearBtn.addEventListener('click', () => {
+    ui.expenseStartDate.value = '';
+    ui.expenseEndDate.value   = '';
+    renderExpensesList();
+  });
+
+  /* ══════════════════════════════════════════════
      EXPORT / IMPORT  (permanecem locais)
   ══════════════════════════════════════════════ */
   function downloadBlob(blob, name) {
@@ -967,6 +1127,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateReports();
     renderProductsList();
     renderChart();
+    populateCategorySelect();
+    updateExpenseSummary();
+    renderExpensesList();
   }
 
   /* ══════════════════════════════════════════════
@@ -995,7 +1158,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     console.log('[init] chamando loadData()...');
     await loadData();
-    console.log('[init] loadData() concluído. products:', data.products.length, 'stock:', Object.keys(data.stock).length, 'salesHistory:', data.salesHistory.length);
+    console.log('[init] loadData() concluído. products:', data.products.length, 'stock:', Object.keys(data.stock).length, 'salesHistory:', data.salesHistory.length, 'categories:', data.categories.length, 'expenses:', data.expenses.length);
 
     try {
       restoreViews.forEach(fn => fn());

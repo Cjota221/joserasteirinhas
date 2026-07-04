@@ -946,12 +946,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupNav();
     setupProfile();
 
-    // Mostra loading enquanto busca do Supabase
+    // Mostra loading enquanto busca do Supabase (preservando o HTML original para restaurar depois)
+    const restoreViews = [];
     ui.views.forEach(v => { if (!v.classList.contains('hidden')) {
+      const original = v.innerHTML;
       v.innerHTML = '<div class="view-inner"><p class="no-data-text">Carregando dados…</p></div>';
+      restoreViews.push(() => { v.innerHTML = original; });
     }});
 
     await loadData();
+    restoreViews.forEach(fn => fn());
     updateProfile();
     refresh();
     setupConnectionStatus();

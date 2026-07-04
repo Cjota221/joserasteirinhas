@@ -447,7 +447,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (res.queued) toast('Sem internet — venda na fila', 'warn');
         setConnStatus(navigator.onLine);
       })
-      .catch(() => toast('Erro ao salvar no Supabase', 'error'));
+      .catch(err => {
+        console.error('[registerSale] falhou:', err);
+        toast('Erro ao salvar no Supabase', 'error');
+      });
   });
 
   ui.newSaleBtn.addEventListener('click', openSaleModal);
@@ -537,7 +540,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (res.queued) toast('Sem internet — estoque na fila', 'warn');
         setConnStatus(navigator.onLine);
       })
-      .catch(() => toast('Erro ao salvar estoque', 'error'));
+      .catch(err => {
+        console.error('[addStock] falhou:', err);
+        toast('Erro ao salvar estoque', 'error');
+      });
   }
 
   function undoStock(productId) {
@@ -558,7 +564,10 @@ document.addEventListener('DOMContentLoaded', async () => {
           if (res.queued) toast('Será sincronizado ao reconectar', 'warn');
           setConnStatus(navigator.onLine);
         })
-        .catch(() => toast('Erro ao desfazer no Supabase', 'error'));
+        .catch(err => {
+          console.error('[undoStock] falhou:', err);
+          toast('Erro ao desfazer no Supabase', 'error');
+        });
     });
   }
 
@@ -586,7 +595,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (res.queued) toast('Será sincronizado ao reconectar', 'warn');
         setConnStatus(navigator.onLine);
       })
-      .catch(() => toast('Erro ao salvar estoque', 'error'));
+      .catch(err => {
+        console.error('[setStock] falhou:', err);
+        toast('Erro ao salvar estoque', 'error');
+      });
   });
 
   /* ══════════════════════════════════════════════
@@ -705,7 +717,10 @@ document.addEventListener('DOMContentLoaded', async () => {
           if (res.queued) toast('Será sincronizado ao reconectar', 'warn');
           setConnStatus(navigator.onLine);
         })
-        .catch(() => toast('Erro ao remover no Supabase', 'error'));
+        .catch(err => {
+          console.error('[deleteSale] falhou:', err);
+          toast('Erro ao remover no Supabase', 'error');
+        });
     });
   }
 
@@ -819,7 +834,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         toast(`Produto ${p.active ? 'ativado' : 'desativado'}!`);
         DB.toggleProduct(p.id, p.active)
           .then(res => { if (res.queued) toast('Será sincronizado ao reconectar', 'warn'); setConnStatus(navigator.onLine); })
-          .catch(() => toast('Erro ao atualizar produto', 'error'));
+          .catch(err => {
+            console.error('[toggleProduct] falhou:', err);
+            toast('Erro ao atualizar produto', 'error');
+          });
       }
     );
   }
@@ -839,7 +857,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       toast('Produto atualizado!');
       DB.updateProduct(editingProductId, name, price)
         .then(res => { if (res.queued) toast('Será sincronizado ao reconectar', 'warn'); setConnStatus(navigator.onLine); })
-        .catch(() => toast('Erro ao salvar produto', 'error'));
+        .catch(err => {
+          console.error('[updateProduct] falhou:', err);
+          toast('Erro ao salvar produto', 'error');
+        });
     } else {
       const newId  = 'p_' + Date.now();
       const newProd = { id: newId, name, price, active: true, created_at: new Date().toISOString() };
@@ -848,7 +869,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       toast('Produto adicionado!');
       DB.insertProduct(newProd)
         .then(res => { if (res.queued) toast('Será sincronizado ao reconectar', 'warn'); setConnStatus(navigator.onLine); })
-        .catch(() => toast('Erro ao salvar produto', 'error'));
+        .catch(err => {
+          console.error('[insertProduct] falhou:', err);
+          toast('Erro ao salvar produto', 'error');
+        });
     }
 
     refresh();

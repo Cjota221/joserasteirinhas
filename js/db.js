@@ -7,10 +7,16 @@
    ⚠️ 'total' em jose_vendas é GERADO pelo banco —
       NUNCA inserir esse campo manualmente.
 ══════════════════════════════════════════════ */
+if (typeof supabase === 'undefined') {
+  console.error('[Supabase] SDK não carregou (CDN bloqueado ou offline). App vai operar em modo offline/cache.');
+}
+
 const _sb = supabase.createClient(
   'https://ntabjivonxmaxdiwxtda.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50YWJqaXZvbnhtYXhkaXd4dGRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzMTAzNDQsImV4cCI6MjA5Nzg4NjM0NH0.zwtH8WdgH2-TUrAbY1Zfs47_YuaAiNu30DJVifQO0A0'
 );
+
+console.log('[Supabase] Cliente inicializado para', 'https://ntabjivonxmaxdiwxtda.supabase.co');
 
 /* ══════════════════════════════════════════════
    CACHE  (último estado bem-sucedido do Supabase)

@@ -294,7 +294,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (navigator.onLine) {
       try {
-        const fetched = await DB.fetchAll();
+        const timeout = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Timeout ao conectar no Supabase (10s)')), 10000)
+        );
+        const fetched = await Promise.race([DB.fetchAll(), timeout]);
         data.products     = fetched.products;
         data.stock        = fetched.stock;
         data.salesHistory = fetched.salesHistory;

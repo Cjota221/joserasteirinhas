@@ -297,12 +297,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         const timeout = new Promise((_, reject) =>
           setTimeout(() => reject(new Error('Timeout ao conectar no Supabase (10s)')), 10000)
         );
+        console.log('[loadData] chamando DB.fetchAll()...');
         const fetched = await Promise.race([DB.fetchAll(), timeout]);
+        console.log('[loadData] DB.fetchAll() retornou:', fetched);
         data.products     = fetched.products;
         data.stock        = fetched.stock;
         data.salesHistory = fetched.salesHistory;
         data.stockHistory = fetched.stockHistory;
         DB.Cache.set(fetched);
+        console.log('[loadData] dados atribuídos e cacheados com sucesso');
         return;
       } catch (err) {
         console.warn('[loadData] Supabase falhou:', err);
@@ -981,10 +984,23 @@ document.addEventListener('DOMContentLoaded', async () => {
       restoreViews.push(() => { v.innerHTML = original; });
     }});
 
+    console.log('[init] chamando loadData()...');
     await loadData();
-    restoreViews.forEach(fn => fn());
-    updateProfile();
-    refresh();
+    console.log('[init] loadData() concluído. products:', data.products.length, 'stock:', Object.keys(data.stock).length, 'salesHistory:', data.salesHistory.length);
+
+    try {
+      restoreViews.forEach(fn => fn());
+      console.log('[init] views restauradas');
+      updateProfile();
+      console.log('[init] updateProfile OK');
+      refresh();
+      console.log('[init] refresh OK — app deveria estar visível agora');
+    } catch (err) {
+      console.error('[init] ERRO ao renderizar após loadData:', err);
+      restoreViews.forEach(fn => fn());
+      toast('Erro ao exibir dados — veja o console', 'error');
+    }
+
     setupConnectionStatus();
 
     // Processar fila offline residual ao iniciar
